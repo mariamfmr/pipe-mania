@@ -1,4 +1,5 @@
 from sys import stdin
+import numpy as np
 from search import Problem, Node
 
 
@@ -76,14 +77,16 @@ class PipeMania(Problem):
 
 
     def actions(self, state: PipeManiaState):
-        """ Returns a list of actions that can be executed from the given state. """
-        available_actions = []
+        """ Returns a 3D array of actions that can be executed from the given state. """
+        num_rows, num_cols = len(state.board.grid), len(state.board.grid[0])
+        available_actions = np.empty((num_rows, num_cols, 2), dtype=object)
 
         # Iterate over each position on the board
-        for row in range(len(state.board.grid)):
-            for col in range(len(state.board.grid[0])):
+        for row in range(num_rows):
+            for col in range(num_cols):
                 piece = state.board.get_value(row, col)
-                available_actions.extend([piece[0] + PipeMania.rotate(piece[1], clockwise) for clockwise in [0, 1]])
+                actions_at_position = [piece[0] + PipeMania.rotate(piece[1], clockwise) for clockwise in [0, 1]]
+                available_actions[row, col] = actions_at_position
 
         return available_actions
 
@@ -94,15 +97,20 @@ class PipeMania(Problem):
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
         self.actions(state). """
-        # TODO
-        pass
+        
+        piece = Board.get_value(state.board, action[0], action[1])
+        rotated_piece = piece[0] + PipeMania.rotate(piece[1], action[2])
+        possible_rotations = self.actions(state)[action[0], action[1]]
+        if (rotated_piece in possible_rotations):
+            state.board.grid[action[0]][action[1]] = rotated_piece
+            
+        return state
     
-    """
     def h(self, node: Node):
-         Função heuristica utilizada para a procura A*. 
+        """ Função heuristica utilizada para a procura A*. """
         # TODO
         pass
-    """
+
 
 # Assuming you have the input string
 input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
@@ -114,9 +122,12 @@ print(board.adjacent_horizontal_values(0, 0))
 
 # Create insatance of PipeMania
 problem = PipeMania(board, board)
-print(problem.actions(PipeManiaState(board)))
+# print(problem.actions(PipeManiaState(board)))
 
 # Create the initial state
 initial_state = PipeManiaState(board)
+print(board.get_value(2, 2))
+result_state = problem.result(initial_state, (2, 2, True))
+print(result_state.board.get_value(2, 2))
 
 # Cr
