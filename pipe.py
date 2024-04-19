@@ -2,12 +2,13 @@ from sys import stdin
 from search import Problem, Node
 
 
-class State:
+class PipeManiaState:
     state_id = 0
+
     def __init__(self, board):
         self.board = board
-        self.id = State.state_id
-        State.state_id += 1
+        self.id = PipeManiaState.state_id
+        PipeManiaState.state_id += 1
 
     def __lt__(self, other):
         """ Este método é utilizado em caso de empate na gestão da lista
@@ -31,12 +32,15 @@ class Board:
         left = None if col == 0 else self.grid[row][col - 1]
         right = None if col == len(self.grid[0]) - 1 else self.grid[row][col + 1]
         return left, right
+    
+    def get_value(self, row: int, col: int) -> str:
+        """ Devolve o valor na posição (row, col). """
+        return self.grid[row][col]
 
     def print(self):
         """ Imprime a grelha. """
         for row in self.grid:
             print('\t'.join(row))
-    
     
     @staticmethod
     def parse_instance(input_string: str):
@@ -52,18 +56,40 @@ class Board:
         return Board(grid)
 
 class PipeMania(Problem):
+
     def __init__(self, initial_state: Board, goal_state: Board):
         """ O construtor especifica o estado inicial. """
-        # TODO
-        pass
+        self.initial_state = initial_state
+        self.goal_state = goal_state
 
-    def actions(self, state: State):
-        """ Retorna uma lista de ações que podem ser executadas a
-        partir do estado passado como argumento. """
-        # TODO
-        pass
+    def rotate(rotation: str, clockwise: bool) -> str:
+        """Rotate the given string representing orientation clockwise or counter-clockwise."""
+        # Define clockwise and counter-clockwise rotations for each orientation
+        clockwise_rotations = {'C': 'D', 'D': 'B', 'B': 'E', 'E': 'C', 'H': 'V', 'V': 'H'}
+        counter_clockwise_rotations = {'C': 'E', 'D': 'C', 'B': 'D', 'E': 'B', 'H': 'V', 'V': 'H'}
 
-    def result(self, state: State, action):
+        # Select the appropriate dictionary based on the direction of rotation
+        rotations = clockwise_rotations if clockwise else counter_clockwise_rotations
+
+        # Return the next or previous orientation based on the direction of rotation
+        return rotations.get(rotation, rotation)  # Return the current rotation if not found in the dictionary
+
+
+    def actions(self, state: PipeManiaState):
+        """ Returns a list of actions that can be executed from the given state. """
+        available_actions = []
+
+        # Iterate over each position on the board
+        for row in range(len(state.board.grid)):
+            for col in range(len(state.board.grid[0])):
+                piece = state.board.get_value(row, col)
+                available_actions.extend([piece[0] + PipeMania.rotate(piece[1], clockwise) for clockwise in [0, 1]])
+
+        return available_actions
+
+                
+
+    def result(self, state: PipeManiaState, action):
         """ Retorna o estado resultante de executar a 'action' sobre
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
@@ -84,4 +110,13 @@ input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
 # Create a Board object by parsing the input string
 board = Board.parse_instance(input_string)
 board.print()
-print(board.adjacent_horizontal_values(1, 1))
+print(board.adjacent_horizontal_values(0, 0))
+
+# Create insatance of PipeMania
+problem = PipeMania(board, board)
+print(problem.actions(PipeManiaState(board)))
+
+# Create the initial state
+initial_state = PipeManiaState(board)
+
+# Cr
