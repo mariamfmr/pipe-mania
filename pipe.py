@@ -34,6 +34,48 @@ class Board:
         right = None if col == len(self.grid[0]) - 1 else self.grid[row][col + 1]
         return left, right
     
+    def is_corner_upper_right(self, row: int, col: int) -> bool:
+        """ Verifica se a posição é um canto superior direito. """
+        return row == 0 and col == len(self.grid[0]) - 1
+    
+    def is_corner_upper_left(self, row: int, col: int) -> bool:
+        """ Verifica se a posição é um canto superior esquerdo. """
+        return row == 0 and col == 0
+    
+    def is_corner_lower_right(self, row: int, col: int) -> bool:
+        """ Verifica se a posição é um canto inferior direito. """
+        return row == len(self.grid) - 1 and col == len(self.grid[0]) - 1
+    
+    def is_corner_lower_left(self, row: int, col: int) -> bool:
+        """ Verifica se a posição é um canto inferior esquerdo. """
+        return row == len(self.grid) - 1 and col == 0
+    
+    def is_edge_upper(self, row: int, col: int) -> bool:
+        """ Verifica se a posição é uma aresta superior. """
+        return row == 0
+    
+    def is_edge_lower(self, row: int, col: int) -> bool:
+        """ Verifica se a posição é uma aresta inferior. """
+        return row == len(self.grid) - 1
+    
+    def is_edge_left(self, row: int, col: int) -> bool:
+        """ Verifica se a posição é uma aresta esquerda. """
+        return col == 0
+    
+    def is_edge_right(self, row: int, col: int) -> bool:
+        """ Verifica se a posição é uma aresta direita. """
+        return col == len(self.grid[0]) - 1
+    
+    def is_connected_horizontal(self, row: int, col: int) -> bool:
+        """ Verifica se a peça na posição (row, col) está ligada à direita. """
+        
+    def is_connected_vertical(self, row: int, col: int) -> bool:
+        """ Verifica se a peça na posição (row, col) está ligada acima. """
+        vertical_pairs = [['FC', 'BB'], ['FC', 'BE'], ['FC', 'BD'], ['FC', 'VB'], ['FC', 'VE'], ['FC', 'LV'], ['BC', 'BB'], ['BC', 'BE'], ['BC', 'BD'], ['BC', 'VB'], ['BC', 'VE'], ['BC', 'LV'], ['BE', 'BD'], ['BE', 'VB'], ['BE', 'VE'], ['BE', 'LV'], ['BD', 'FB'], ['BD', 'VB'], ['BD', 'VE'], ['BD', 'LV'], ['VC', 'FB'], ['VC', 'BB'], ['VC', 'BD'], ['VC', 'VB'], ['VC', 'VE'], ['VC', 'LV'], ['VD', 'FB'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'BD'], ['VD', 'VB'], ['VD', 'VE'], ['VD', 'LV'], ['LV', 'FB'], ['LV', 'BB'], ['LV', 'BE'], ['LV', 'BD'], ['LV', 'VB'], ['LV', 'VE'], ['LV', 'LV']]
+        vertical = self.adjacent_vertical_values(row, col)
+        if vertical[0] is not None: # Se a peça acima existir
+            return ([vertical[0], self.grid[row][col]] in vertical_pairs) 
+
     def get_value(self, row: int, col: int) -> str:
         """ Devolve o valor na posição (row, col). """
         return self.grid[row][col]
@@ -129,5 +171,3 @@ initial_state = PipeManiaState(board)
 print(board.get_value(2, 2))
 result_state = problem.result(initial_state, (2, 2, True))
 print(result_state.board.get_value(2, 2))
-
-# Cr
