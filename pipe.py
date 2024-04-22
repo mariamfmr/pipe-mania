@@ -2,21 +2,6 @@ from sys import stdin
 import numpy as np
 from search import Problem, Node
 
-
-class PipeManiaState:
-    state_id = 0
-
-    def __init__(self, board):
-        self.board = board
-        self.id = PipeManiaState.state_id
-        PipeManiaState.state_id += 1
-
-    def __lt__(self, other):
-        """ Este método é utilizado em caso de empate na gestão da lista
-        de abertos nas procuras informadas. """
-        return self.id < other.id
-
-
 class Board:
 
     def __init__(self, grid):
@@ -75,27 +60,24 @@ class Board:
                             ['VB', 'FE'], ['VB', 'BC'], ['VB', 'BB'], ['VB', 'BE'], ['VB', 'VC'], ['VB', 'VE'], ['VB', 'LH'],
                             ['LH', 'FE'], ['LH', 'BC'], ['LH', 'BB'], ['LH', 'BE'], ['LH', 'VC'], ['LH', 'VE'], ['LH', 'LH'],
                             ['VD', 'FE'], ['VD', 'BC'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'VC'],['VD', 'LH']]
-        horizontal = self.adjacent_horizontal_values(row, col)
-        if horizontal[1] is not None: # Se a peça à direita existir
-            if isLeft:
-                return ([self.grid[row][col], horizontal[1]] in horizontal_pairs)
-            else:
-                return ([horizontal[1], self.grid[row][col]] in horizontal_pairs)
-                
+        horizontal = self.adjacent_horizontal_values(row, col) # left, right
 
+        if isLeft:
+            return ([self.grid[row][col], horizontal[1]] in horizontal_pairs)
+        else:
+            return ([horizontal[0], self.grid[row][col]] in horizontal_pairs)
+                
 
     def is_connected_vertical(self, row: int, col: int, isUpper: bool) -> bool:
         """ Verifica se a peça na posição (row, col) está ligada acima. """
         vertical_pairs = [['FC', 'BB'], ['FC', 'BE'], ['FC', 'BD'], ['FC', 'VB'], ['FC', 'VE'], ['FC', 'LV'],
                           ['BC', 'FB'], ['BC', 'BB'], ['BC', 'BE'], ['BC', 'BD'], ['BC', 'VB'], ['BC', 'VE'], ['BC', 'LV'], 
                           ['BE', 'BD'], ['BE', 'VB'], ['BE', 'VE'], ['BE', 'LV'], ['BD', 'FB'], ['BD', 'VB'], ['BD', 'VE'], ['BD', 'LV'], ['VC', 'FB'], ['VC', 'BB'], ['VC', 'BD'], ['VC', 'VB'], ['VC', 'VE'], ['VC', 'LV'], ['VD', 'FB'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'BD'], ['VD', 'VB'], ['VD', 'VE'], ['VD', 'LV'], ['LV', 'FB'], ['LV', 'BB'], ['LV', 'BE'], ['LV', 'BD'], ['LV', 'VB'], ['LV', 'VE'], ['LV', 'LV']]
-        vertical = self.adjacent_vertical_values(row, col)
-        print(vertical[0])
-        if vertical[0] is not None: # Se a peça acima existir
-            if not isUpper:
-                return ([self.grid[row][col], vertical[0] ] in vertical_pairs) 
-            else:
-                return ([vertical[0], self.grid[row][col]] in vertical_pairs)
+        vertical = self.adjacent_vertical_values(row, col) # above, below
+        if not isUpper:
+            return ([self.grid[row][col], vertical[0] ] in vertical_pairs) 
+        else:
+            return ([vertical[1], self.grid[row][col]] in vertical_pairs)
 
     def get_value(self, row: int, col: int) -> str:
         """ Devolve o valor na posição (row, col). """
@@ -118,6 +100,25 @@ class Board:
             grid.append(pieces)
 
         return Board(grid)
+    
+
+class PipeManiaState:
+    state_id = 0
+
+    def __init__(self, board: Board):
+        self.board = board
+        self.id = PipeManiaState.state_id
+        PipeManiaState.state_id += 1
+
+    def __lt__(self, other):
+        """ Este método é utilizado em caso de empate na gestão da lista
+        de abertos nas procuras informadas. """
+        return self.id < other.id
+    
+    def get_value(self, row: int, col: int) -> str:
+        """ Devolve o valor na posição (row, col). """
+        return self.board.grid[row][col]
+
 
 class PipeMania(Problem):
 
@@ -152,22 +153,37 @@ class PipeMania(Problem):
                 available_actions[row, col] = actions_at_position
 
         return available_actions
-
-                
-
+    
+    def goal_test(self, state: PipeManiaState)-> bool:
+        """ Retorna True se 'state' é um estado objetivo. """
+        # check for each piece if it is connected
+        for row in range(len(state.board.grid)):
+            for col in range(len(state.board.grid[0])):
+                piece = state.board.get_value(row, col)
+                if not Piece(piece).isConnected(state.board, row, col):
+                    return False
+        return True
+    
     def result(self, state: PipeManiaState, action):
         """ Retorna o estado resultante de executar a 'action' sobre
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
         self.actions(state). """
         
-        piece = Board.get_value(state.board, action[0], action[1])
+        # Create a copy of the board to modify
+        new_board = Board([row[:] for row in state.board.grid])
+        
+        piece = new_board.get_value(action[0], action[1])
         rotated_piece = piece[0] + PipeMania.rotate(piece[1], action[2])
         possible_rotations = self.actions(state)[action[0], action[1]]
-        if (rotated_piece in possible_rotations):
-            state.board.grid[action[0]][action[1]] = rotated_piece
-            
-        return state
+        
+        if rotated_piece in possible_rotations:
+            # Modify the copy of the board
+            new_board.grid[action[0]][action[1]] = rotated_piece
+        
+        # Create and return a new state with the modified board
+        return PipeManiaState(new_board)
+
     
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
@@ -178,7 +194,7 @@ class Piece():
     def __init__(self, piece_type: str):
         self.piece_type = piece_type
 
-    def isConnected(self, Board: Board, row: int, col: int):
+    def isConnected(self, board: Board, row: int, col: int)->bool:
         if self.piece_type == 'FC':
             return board.is_connected_vertical(row, col, False)
         elif self.piece_type == 'FB':
@@ -207,14 +223,18 @@ class Piece():
             return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False)
         elif self.piece_type == 'LV':
             return board.is_connected_vertical(row, col, True) and board.is_connected_vertical(row, col, False)
-
+        else:
+            return False
   
 # Assuming you have the input string
 input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
 
+"""
 # Create a Board object by parsing the input string
 board = Board.parse_instance(input_string)
 board.print()
+
+
 print(board.adjacent_horizontal_values(0, 0))
 
 # Create insatance of PipeMania
@@ -228,11 +248,35 @@ result_state = problem.result(initial_state, (2, 2, True)) ## Rotate the piece a
 result_state.board.print()
 print(result_state.board.is_connected_vertical(1, 0, False))
 
-# iterate all pieces in board and check if is connected, print in grid format
-for row in range(len(board.grid)):
-    for col in range(len(board.grid[0])):
-        piece = Piece(board.get_value(row, col))
-        print(piece.isConnected(board, row, col))
-        print('\t', end='')
+"""
 
+board = Board.parse_instance(input_string)
+# Criar uma instância de PipeMania:
+problem = PipeMania(board, board)
+#print board
+board.print() 
+print("\n")
 
+# Criar um estado com a configuração inicial:
+s0 = PipeManiaState(board)
+# Aplicar as ações que resolvem a instância
+s1 = problem.result(s0, (0, 1, True))
+s2 = problem.result(s1, (0, 1, True))
+s3 = problem.result(s2, (0, 2, True))
+s4 = problem.result(s3, (0, 2, True))
+s5 = problem.result(s4, (1, 0, True))
+
+s6 = problem.result(s5, (1, 1, True))
+s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (exemplo de uso)
+s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (exemplo de uso)
+s9 = problem.result(s8, (2, 1, True))
+s10 = problem.result(s9, (2, 1, True))
+s11 = problem.result(s10, (2, 2, True))
+# Verificar se foi atingida a solução
+
+print("S5: Is goal?", problem.goal_test(s5))
+s5.board.print()
+print("S11: Is goal?", problem.goal_test(s11))
+s11.board.print()
+#print("Is goal?", problem.goal_test(s11))
+#print("Solution:\n", s11.board.print(), sep="")
