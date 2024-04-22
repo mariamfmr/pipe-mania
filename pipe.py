@@ -66,7 +66,7 @@ class Board:
         """ Verifica se a posição é uma aresta direita. """
         return col == len(self.grid[0]) - 1
     
-    def is_connected_horizontal(self, row: int, col: int) -> bool:
+    def is_connected_horizontal(self, row: int, col: int, isLeft: bool) -> bool:
         """ Verifica se a peça na posição (row, col) está ligada à direita. """
         horizontal_pairs = [['FD', 'BC'], ['FD', 'BB'], ['FD', 'BE'], ['FD', 'VC'], ['FD', 'VE'], ['FD', 'LH'], 
                             ['BC','BC'] ,['BC', 'BB'], ['BC', 'BE'], ['BC', 'FE'],['BC', 'VC'], ['BC', 'VE'], ['BC', 'LH'],
@@ -77,10 +77,14 @@ class Board:
                             ['VD', 'FE'], ['VD', 'BC'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'VC'],['VD', 'LH']]
         horizontal = self.adjacent_horizontal_values(row, col)
         if horizontal[1] is not None: # Se a peça à direita existir
-            return ([self.grid[row][col], horizontal[1]] in horizontal_pairs)
+            if isLeft:
+                return ([self.grid[row][col], horizontal[1]] in horizontal_pairs)
+            else:
+                return ([horizontal[1], self.grid[row][col]] in horizontal_pairs)
+                
 
 
-    def is_connected_vertical(self, row: int, col: int) -> bool:
+    def is_connected_vertical(self, row: int, col: int, isUpper: bool) -> bool:
         """ Verifica se a peça na posição (row, col) está ligada acima. """
         vertical_pairs = [['FC', 'BB'], ['FC', 'BE'], ['FC', 'BD'], ['FC', 'VB'], ['FC', 'VE'], ['FC', 'LV'],
                           ['BC', 'FB'], ['BC', 'BB'], ['BC', 'BE'], ['BC', 'BD'], ['BC', 'VB'], ['BC', 'VE'], ['BC', 'LV'], 
@@ -88,7 +92,10 @@ class Board:
         vertical = self.adjacent_vertical_values(row, col)
         print(vertical[0])
         if vertical[0] is not None: # Se a peça acima existir
-            return ([self.grid[row][col], vertical[0] ] in vertical_pairs) 
+            if not isUpper:
+                return ([self.grid[row][col], vertical[0] ] in vertical_pairs) 
+            else:
+                return ([vertical[0], self.grid[row][col]] in vertical_pairs)
 
     def get_value(self, row: int, col: int) -> str:
         """ Devolve o valor na posição (row, col). """
@@ -167,7 +174,41 @@ class PipeMania(Problem):
         # TODO
         pass
 
+class Piece():
+    def __init__(self, piece_type: str):
+        self.piece_type = piece_type
 
+    def isConnected(self, Board: Board, row: int, col: int):
+        if self.piece_type == 'FC':
+            return board.is_connected_vertical(row, col, False)
+        elif self.piece_type == 'FB':
+            return board.is_connected_vertical(row, col, True)
+        elif self.piece_type == 'FE':
+            return board.is_connected_horizontal(row, col, False)
+        elif self.piece_type == 'FD':
+            return board.is_connected_horizontal(row, col, True)
+        elif self.piece_type == 'BC':
+            return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, False)
+        elif self.piece_type == 'BB':
+            return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, True)
+        elif self.piece_type == 'BE':
+            return board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, False) and board.is_connected_vertical(row, col, True)
+        elif self.piece_type == 'BD':
+            return board.is_connected_horizontal(row, col, True) and board.is_connected_vertical(row, col, True) and board.is_connected_vertical(row, col, False)
+        elif self.piece_type == 'VC':
+            return board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, False)
+        elif self.piece_type == 'VB':
+            return board.is_connected_horizontal(row, col, True) and board.is_connected_vertical(row, col, True)
+        elif self.piece_type == 'VE':
+            return board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, True)
+        elif self.piece_type == 'VD':
+            return board.is_connected_horizontal(row, col, True) and board.is_connected_vertical(row, col, False)
+        elif self.piece_type == 'LH':
+            return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False)
+        elif self.piece_type == 'LV':
+            return board.is_connected_vertical(row, col, True) and board.is_connected_vertical(row, col, False)
+
+  
 # Assuming you have the input string
 input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
 
@@ -182,9 +223,16 @@ problem = PipeMania(board, board)
 
 # Create the initial state
 initial_state = PipeManiaState(board)
-print(board.get_value(2, 2))
-result_state = problem.result(initial_state, (2, 2, True))
-print(result_state.board.get_value(2, 2))
+result_state = problem.result(initial_state, (2, 2, True)) ## Rotate the piece at position (2, 2) clockwise
 
 result_state.board.print()
-print(result_state.board.is_connected_vertical(1, 0))
+print(result_state.board.is_connected_vertical(1, 0, False))
+
+# iterate all pieces in board and check if is connected, print in grid format
+for row in range(len(board.grid)):
+    for col in range(len(board.grid[0])):
+        piece = Piece(board.get_value(row, col))
+        print(piece.isConnected(board, row, col))
+        print('\t', end='')
+
+
