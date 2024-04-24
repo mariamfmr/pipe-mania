@@ -1,6 +1,6 @@
 from sys import stdin
 import numpy as np
-from search import Problem, Node
+from search import Problem, Node, depth_first_tree_search
 
 class Board:
 
@@ -139,6 +139,49 @@ class PipeMania(Problem):
         # Return the next or previous orientation based on the direction of rotation
         return rotations.get(rotation, rotation)  # Return the current rotation if not found in the dictionary
 
+    def isValidPiece(piece: str, row, col) -> bool:
+        if (piece == 'FC' and board.is_edge_upper(row, col)):
+            return False
+        elif (piece == 'FB' and board.is_edge_lower(row, col)):
+            return False
+        elif (piece == 'FE' and board.is_edge_left(row, col)):
+            return False
+        elif (piece == 'FD' and board.is_edge_right(row, col)):
+            return False
+        elif (piece == 'BC' and (board.is_edge_upper(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_lower_right(row, col))):
+            return False
+        elif (piece == 'BB' and (board.is_edge_lower(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_lower_right(row, col))):
+            return False
+        elif (piece == 'BE' and (board.is_edge_left(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col))):
+            return False
+        elif (piece == 'BD' and (board.is_edge_right(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_lower_left(row, col))):
+            return False
+        elif (piece == 'VC' and (board.is_edge_upper(row, col) or board.is_edge_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_upper_left(row, col))):
+            return False
+        elif (piece == 'VB' and (board.is_edge_lower(row, col) or board.is_edge_right(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_lower_right(row, col))):
+            return False
+        elif (piece == 'VE' and (board.is_edge_lower(row, col) or board.is_edge_left(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_lower_right(row, col))):
+            return False
+        elif (piece == 'VD' and (board.is_edge_upper(row, col) or board.is_edge_right(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col))):
+            return False
+        elif (piece == 'LH' and (board.is_edge_right(row, col) or board.is_edge_left(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col) or board.is_corner_lower_left(row, col))):
+            return False
+        elif (piece == 'LV' and (board.is_edge_upper(row, col) or board.is_edge_lower(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col) or board.is_corner_lower_left(row, col))):
+            return False
+        else:
+            return True
+
+    def get_valid_rotations(piece: str, row: int, col: int) -> list:
+        """ Returns a list of valid rotations for the given piece. """
+        valid_rotations = []
+        if (problem.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 0)),  row, col):
+            valid_rotations.append(piece[0] + PipeMania.rotate(piece[1], 0))
+        if (problem.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 1)),  row, col):
+            valid_rotations.append(piece[0] + PipeMania.rotate(piece[1], 1))
+        return valid_rotations
+
+
+
 
     def actions(self, state: PipeManiaState):
         """ Returns a 3D array of actions that can be executed from the given state. """
@@ -150,6 +193,7 @@ class PipeMania(Problem):
             for col in range(num_cols):
                 piece = state.board.get_value(row, col)
                 actions_at_position = [piece[0] + PipeMania.rotate(piece[1], clockwise) for clockwise in [0, 1]]
+                #actions_at_position = problem.get_valid_rotations(piece, row, col)
                 available_actions[row, col] = actions_at_position
 
         return available_actions
@@ -250,6 +294,7 @@ print(result_state.board.is_connected_vertical(1, 0, False))
 
 """
 
+"""
 board = Board.parse_instance(input_string)
 # Criar uma instância de PipeMania:
 problem = PipeMania(board, board)
@@ -280,3 +325,12 @@ print("S11: Is goal?", problem.goal_test(s11))
 s11.board.print()
 #print("Is goal?", problem.goal_test(s11))
 #print("Solution:\n", s11.board.print(), sep="")
+"""
+
+input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
+board = Board.parse_instance(input_string)
+problem = PipeMania(board, board)
+goal_node = depth_first_tree_search(problem)
+
+print("Is goal?", problem.goal_test(goal_node.state))
+print("Solution:\n", goal_node.solution(), sep="")

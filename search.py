@@ -84,8 +84,14 @@ class Node:
 
     def expand(self, problem):
         """List the nodes reachable in one step from this node."""
-        return [self.child_node(problem, action)
-                for action in problem.actions(self.state)]
+        # Generate a list of actions that can be executed from the current state
+        available_actions = problem.actions(self.state)
+
+        # Create child nodes by applying each action to the current state
+        child_nodes = [self.child_node(problem, action) for action in available_actions]
+
+        return child_nodes
+
 
     def child_node(self, problem, action):
         """[Figure 3.10]"""
@@ -126,15 +132,14 @@ class Node:
 # ______________________________________________________________________________
 # Uninformed Search algorithms
 
-
+"""
 def breadth_first_tree_search(problem):
-    """
+
     [Figure 3.7]
     Search the shallowest nodes in the search tree first.
     Search through the successors of a problem to find a goal.
     The argument frontier should be an empty queue.
     Repeats infinitely in case of loops.
-    """
 
     frontier = deque([Node(problem.initial)])  # FIFO queue
 
@@ -144,7 +149,7 @@ def breadth_first_tree_search(problem):
             return node
         frontier.extend(node.expand(problem))
     return None
-
+"""
 
 def depth_first_tree_search(problem):
     """
