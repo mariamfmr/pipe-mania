@@ -155,7 +155,7 @@ class PipeMania(Problem):
         # Return the next or previous orientation based on the direction of rotation
         return rotations.get(rotation, rotation)  # Return the current rotation if not found in the dictionary
 
-    def isValidPiece(piece: str, row, col) -> bool:
+    def isValidPiece(self, piece: str, row, col) -> bool:
         if (piece == 'FC' and board.is_edge_upper(row, col)):
             return False
         elif (piece == 'FB' and board.is_edge_lower(row, col)):
@@ -187,31 +187,29 @@ class PipeMania(Problem):
         else:
             return True
 
-    def get_valid_rotations(piece: str, row: int, col: int) -> list:
+    def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
         """ Returns a list of valid rotations for the given piece. """
-        valid_rotations = []
-        if (problem.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 0)),  row, col):
-            valid_rotations.append(piece[0] + PipeMania.rotate(piece[1], 0))
-        if (problem.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 1)),  row, col):
-            valid_rotations.append(piece[0] + PipeMania.rotate(piece[1], 1))
+        valid_rotations = [None, None]
+        if self.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 0),  row, col):
+            valid_rotations[0] = piece[0] + PipeMania.rotate(piece[1], 0)
+        if self.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 1),  row, col):
+            valid_rotations[1] = piece[0] + PipeMania.rotate(piece[1], 1)
         return valid_rotations
 
     def actions(self, state: PipeManiaState):
         """ Returns a 3D array of actions that can be executed from the given state. """
         num_rows, num_cols = len(state.board.grid), len(state.board.grid[0])
         available_actions = np.empty((num_rows, num_cols, 2), dtype=object)
-        #actions_at_position = np.empty((num_rows, num_cols, 2), dtype=object)
 
         # Iterate over each position on the board
         for row in range(num_rows):
             for col in range(num_cols):
                 piece = state.board.get_value(row, col)
-                actions_at_position = [piece[0] + PipeMania.rotate(piece[1], clockwise) for clockwise in [0, 1]]
-                #actions_at_position = problem.get_valid_rotations(piece, row, col)
+                actions_at_position = self.get_valid_rotations(piece, row, col)
                 available_actions[row, col] = actions_at_position
+                #print(available_actions[row, col])
 
         return available_actions
-        #return actions_at_position
 
     def goal_test(self, state: PipeManiaState)-> bool:
         """ Retorna True se 'state' é um estado objetivo. """
@@ -295,9 +293,10 @@ def generate_tree(problem, root):
     for i in range(len(actions)):
         for j in range(len(actions[i])):
             for k in range(len(actions[i][j])):
-                child = problem.result(root, (i, j, k))
-                child_node = Node(child)
-                root_node.add_child(child_node)
+                if actions[i][j][k] is not None:
+                    child = problem.result(root, (i, j, k))
+                    child_node = Node(child)
+                    root_node.add_child(child_node)
 
     # print size of children array
     print(len(root_node.children))
