@@ -1,6 +1,22 @@
-from sys import stdin
+# pipe.py: Template para implementação do projeto de Inteligência Artificial 2023/2024.
+# Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
+# Além das funções e classes sugeridas, podem acrescentar outras que considerem pertinentes.
+
+# Grupo 00:
+# 00000 Nome1
+# 00000 Nome2
+
+import sys
 import numpy as np
-from search import Problem, Node, depth_first_tree_search
+from search import (
+    Problem,
+    Node,
+    astar_search,
+    breadth_first_tree_search,
+    depth_first_tree_search,
+    greedy_search,
+    recursive_best_first_search,
+)
 
 class Board:
 
@@ -100,7 +116,6 @@ class Board:
             grid.append(pieces)
 
         return Board(grid)
-    
 
 class PipeManiaState:
     state_id = 0
@@ -126,6 +141,7 @@ class PipeMania(Problem):
         """ O construtor especifica o estado inicial. """
         self.initial_state = initial_state
         self.goal_state = goal_state
+        self.root = Node(PipeManiaState(initial_state), None, None, 0)
 
     def rotate(rotation: str, clockwise: bool) -> str:
         """Rotate the given string representing orientation clockwise or counter-clockwise."""
@@ -180,13 +196,11 @@ class PipeMania(Problem):
             valid_rotations.append(piece[0] + PipeMania.rotate(piece[1], 1))
         return valid_rotations
 
-
-
-
     def actions(self, state: PipeManiaState):
         """ Returns a 3D array of actions that can be executed from the given state. """
         num_rows, num_cols = len(state.board.grid), len(state.board.grid[0])
         available_actions = np.empty((num_rows, num_cols, 2), dtype=object)
+        #actions_at_position = np.empty((num_rows, num_cols, 2), dtype=object)
 
         # Iterate over each position on the board
         for row in range(num_rows):
@@ -197,7 +211,8 @@ class PipeMania(Problem):
                 available_actions[row, col] = actions_at_position
 
         return available_actions
-    
+        #return actions_at_position
+
     def goal_test(self, state: PipeManiaState)-> bool:
         """ Retorna True se 'state' é um estado objetivo. """
         # check for each piece if it is connected
@@ -227,6 +242,13 @@ class PipeMania(Problem):
         
         # Create and return a new state with the modified board
         return PipeManiaState(new_board)
+    
+    def create_node(self, state: PipeManiaState, parent: Node, action, path_cost):
+        """ Cria um nó da árvore de procura. """
+        state = self.result(state, action) # new state
+        return Node.child_node(parent, action, state, path_cost) # new node
+        
+
 
     
     def h(self, node: Node):
@@ -270,67 +292,78 @@ class Piece():
         else:
             return False
   
-# Assuming you have the input string
-input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
 
-"""
-# Create a Board object by parsing the input string
-board = Board.parse_instance(input_string)
-board.print()
+if __name__ == "__main__":
+    # TODO:
+    # Ler o ficheiro do standard input,
+    # Usar uma técnica de procura para resolver a instância,
+    # Retirar a solução a partir do nó resultante,
+    # Imprimir para o standard output no formato indicado.
+    # Assuming you have the input string
+    input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
+
+    """
+    # Create a Board object by parsing the input string
+    board = Board.parse_instance(input_string)
+    board.print()
 
 
-print(board.adjacent_horizontal_values(0, 0))
+    print(board.adjacent_horizontal_values(0, 0))
 
-# Create insatance of PipeMania
-problem = PipeMania(board, board)
-# print(problem.actions(PipeManiaState(board)))
+    # Create insatance of PipeMania
+    problem = PipeMania(board, board)
+    # print(problem.actions(PipeManiaState(board)))
 
-# Create the initial state
-initial_state = PipeManiaState(board)
-result_state = problem.result(initial_state, (2, 2, True)) ## Rotate the piece at position (2, 2) clockwise
+    # Create the initial state
+    initial_state = PipeManiaState(board)
+    result_state = problem.result(initial_state, (2, 2, True)) ## Rotate the piece at position (2, 2) clockwise
 
-result_state.board.print()
-print(result_state.board.is_connected_vertical(1, 0, False))
+    result_state.board.print()
+    print(result_state.board.is_connected_vertical(1, 0, False))
 
-"""
+    """
 
-"""
-board = Board.parse_instance(input_string)
-# Criar uma instância de PipeMania:
-problem = PipeMania(board, board)
-#print board
-board.print() 
-print("\n")
+    """
+    board = Board.parse_instance(input_string)
+    # Criar uma instância de PipeMania:
+    problem = PipeMania(board, board)
+    #print board
+    board.print() 
+    print("\n")
 
-# Criar um estado com a configuração inicial:
-s0 = PipeManiaState(board)
-# Aplicar as ações que resolvem a instância
-s1 = problem.result(s0, (0, 1, True))
-s2 = problem.result(s1, (0, 1, True))
-s3 = problem.result(s2, (0, 2, True))
-s4 = problem.result(s3, (0, 2, True))
-s5 = problem.result(s4, (1, 0, True))
+    # Criar um estado com a configuração inicial:
+    s0 = PipeManiaState(board)
+    # Aplicar as ações que resolvem a instância
+    s1 = problem.result(s0, (0, 1, True))
+    s2 = problem.result(s1, (0, 1, True))
+    s3 = problem.result(s2, (0, 2, True))
+    s4 = problem.result(s3, (0, 2, True))
+    s5 = problem.result(s4, (1, 0, True))
 
-s6 = problem.result(s5, (1, 1, True))
-s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (exemplo de uso)
-s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (exemplo de uso)
-s9 = problem.result(s8, (2, 1, True))
-s10 = problem.result(s9, (2, 1, True))
-s11 = problem.result(s10, (2, 2, True))
-# Verificar se foi atingida a solução
+    s6 = problem.result(s5, (1, 1, True))
+    s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (exemplo de uso)
+    s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (exemplo de uso)
+    s9 = problem.result(s8, (2, 1, True))
+    s10 = problem.result(s9, (2, 1, True))
+    s11 = problem.result(s10, (2, 2, True))
+    # Verificar se foi atingida a solução
 
-print("S5: Is goal?", problem.goal_test(s5))
-s5.board.print()
-print("S11: Is goal?", problem.goal_test(s11))
-s11.board.print()
-#print("Is goal?", problem.goal_test(s11))
-#print("Solution:\n", s11.board.print(), sep="")
-"""
+    print("S5: Is goal?", problem.goal_test(s5))
+    s5.board.print()
+    print("S11: Is goal?", problem.goal_test(s11))
+    s11.board.print()
+    #print("Is goal?", problem.goal_test(s11))
+    #print("Solution:\n", s11.board.print(), sep="")
+    """
 
-input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
-board = Board.parse_instance(input_string)
-problem = PipeMania(board, board)
-goal_node = depth_first_tree_search(problem)
+    input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
+    board = Board.parse_instance(input_string)
+    problem = PipeMania(board, board)
+    print(problem.actions(PipeManiaState(board)))
+    #goal_node = depth_first_tree_search(problem)
+    # criar node, percorrer actions, criar child nodes, verificar se é goal, se for, return node
+    
 
-print("Is goal?", problem.goal_test(goal_node.state))
-print("Solution:\n", goal_node.solution(), sep="")
+    #print("Is goal?", problem.goal_test(goal_node.state))
+    #print("Solution:\n", goal_node.solution(), sep="")
+    pass
