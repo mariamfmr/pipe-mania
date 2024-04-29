@@ -81,6 +81,7 @@ class Node:
         self.parent = parent # parent node in the search tree
         self.action = action # action is the action taken to get to this state
         self.path_cost = path_cost # path_cost is the cost to reach this state from the initial state
+        self.children = []  
         self.depth = 0
         if parent:
             self.depth = parent.depth + 1
@@ -95,6 +96,10 @@ class Node:
         """List the nodes reachable in one step from this node."""
         return [self.child_node(problem, action)
                 for action in problem.actions(self.state)]
+    
+    def add_child(self, child_node):
+        """Add a child node to the current node."""
+        self.children.append(child_node)
 
     def child_node(self, problem, action):
         """[Figure 3.10]"""
