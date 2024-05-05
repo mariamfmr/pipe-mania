@@ -189,25 +189,37 @@ class PipeMania(Problem):
 
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
         """ Returns a list of valid rotations for the given piece. """
-        valid_rotations = [None, None]
-        if self.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 0),  row, col):
-            valid_rotations[0] = piece[0] + PipeMania.rotate(piece[1], 0)
-        if self.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 1),  row, col):
-            valid_rotations[1] = piece[0] + PipeMania.rotate(piece[1], 1)
+        valid_rotations = [None, None, None]
+        if self.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 0),  row, col): # check if the anti-clockwise rotation is valid
+            valid_rotations[0] = 1 # flag to indicate that the anti-clockwise rotation is valid
+        if self.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 1),  row, col): # check if the clockwise rotation is valid
+            valid_rotations[1] = 1 # flag to indicate that the clockwise rotation is valid
+        
+        # check 180 degree rotation
+        clockwise_rotated_piece = piece[0] + PipeMania.rotate(piece[1], 0)
+        full_rotated_piece = clockwise_rotated_piece[0] + PipeMania.rotate(clockwise_rotated_piece[1], 0)
+        if self.isValidPiece(full_rotated_piece, row, col):
+            valid_rotations[2] = 1 # flag to indicate that the 180 degree rotation is valid
+        
+
         return valid_rotations
 
     def actions(self, state: PipeManiaState):
         """ Returns a 3D array of actions that can be executed from the given state. """
         num_rows, num_cols = len(state.board.grid), len(state.board.grid[0])
-        available_actions = np.empty((num_rows, num_cols, 2), dtype=object)
+        available_actions = []
 
         # Iterate over each position on the board
         for row in range(num_rows):
             for col in range(num_cols):
                 piece = state.board.get_value(row, col)
                 actions_at_position = self.get_valid_rotations(piece, row, col)
-                available_actions[row, col] = actions_at_position
-                #print(available_actions[row, col])
+                if actions_at_position[0] == 1: 
+                    available_actions.append((row, col, False)) # anti-clockwise rotation
+                if actions_at_position[1] == 1:
+                    available_actions.append((row, col, True)) # clockwise rotation
+                if actions_at_position[2] == 1:
+                    available_actions.append((row, col, 2))
 
         return available_actions
 
@@ -226,10 +238,8 @@ class PipeMania(Problem):
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
         self.actions(state). """
-        
         # Create a copy of the board to modify
         new_board = Board([row[:] for row in state.board.grid])
-        
         piece = new_board.get_value(action[0], action[1])   # get the piece at the given position
         rotated_piece = piece[0] + PipeMania.rotate(piece[1], action[2]) # rotate the piece at the given position clockwise or anti-clockwise
         new_board.grid[action[0]][action[1]] = rotated_piece
@@ -277,11 +287,31 @@ class Piece():
             return board.is_connected_vertical(row, col, True) and board.is_connected_vertical(row, col, False)
         else:
             return False
+        
 
-def generate_tree(problem, node):
-    node = Node(node)
-    actions = problem.actions(node.state)
+def expand_tree(root: Node, problem: PipeMania):
+    frontier = [root]
 
+    while frontier:
+        node = frontier.pop()
+        children = node.expand(problem)  # Get the children of the current node
+        
+        # Explore all siblings of the children
+        for child in children:
+            siblings = child.expand(problem)
+            
+            # Explore each sibling
+            for sibling in siblings:
+                print(sibling.state.board.print())
+                print("Cost:", sibling.path_cost)
+                print("\n")
+                if problem.goal_test(sibling.state):
+                    break
+                frontier.append(sibling)
+        
+        # Break the loop if a goal state is found
+        if problem.goal_test(node.state):
+            break
 
 if __name__ == "__main__":
     # TODO:
@@ -351,7 +381,13 @@ if __name__ == "__main__":
     problem = PipeMania(board, board)
     print(board.print())
     print(problem.actions(PipeManiaState(board)))
-    
+    root = Node(PipeManiaState(board), None, None, 0)
+    expand_tree(root, problem)
+
+
+
+    #goal = breadth_first_tree_search(problem)
+
     #print("Is goal?", problem.goal_test(goal_node.state))
     #print("Solution:\n", goal_node.solution(), sep="")
     pass
