@@ -77,11 +77,10 @@ class Node:
 
     def __init__(self, state, parent=None, action=None, path_cost=0):
         """Create a search tree Node, derived from a parent by an action."""
-        self.state = state  # current state of the agent
-        self.parent = parent # parent node in the search tree
-        self.action = action # action is the action taken to get to this state
-        self.path_cost = path_cost # path_cost is the cost to reach this state from the initial state
-        self.children = []  
+        self.state = state
+        self.parent = parent
+        self.action = action
+        self.path_cost = path_cost
         self.depth = 0
         if parent:
             self.depth = parent.depth + 1
@@ -96,16 +95,11 @@ class Node:
         """List the nodes reachable in one step from this node."""
         return [self.child_node(problem, action)
                 for action in problem.actions(self.state)]
-    
-    def add_child(self, child_node):
-        """Add a child node to the current node."""
-        self.children.append(child_node)
 
     def child_node(self, problem, action):
         """[Figure 3.10]"""
         next_state = problem.result(self.state, action)
-        path_cost = problem.path_cost(self.path_cost, self.state, action, next_state)
-        next_node = Node(next_state, self, action, path_cost)
+        next_node = Node(next_state, self, action, problem.path_cost(self.path_cost, self.state, action, next_state))
         return next_node
 
     def solution(self):

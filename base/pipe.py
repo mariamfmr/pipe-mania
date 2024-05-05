@@ -221,7 +221,7 @@ class PipeMania(Problem):
                     return False
         return True
     
-    def result(self, state: PipeManiaState, action):
+    def result(self, state: PipeManiaState, action): # action = (row, col, clockwise)
         """ Retorna o estado resultante de executar a 'action' sobre
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
@@ -232,18 +232,10 @@ class PipeMania(Problem):
         
         piece = new_board.get_value(action[0], action[1])   # get the piece at the given position
         rotated_piece = piece[0] + PipeMania.rotate(piece[1], action[2]) # rotate the piece at the given position clockwise or anti-clockwise
-        possible_rotations = self.actions(state)[action[0], action[1]] # get the possible rotations for the piece at the given position
-        
-        if rotated_piece in possible_rotations: 
-            # Modify the copy of the board
-            new_board.grid[action[0]][action[1]] = rotated_piece
+        new_board.grid[action[0]][action[1]] = rotated_piece
         
         # Create and return a new state with the modified board
         return PipeManiaState(new_board)
-    
-    def create_node(self, state: PipeManiaState, parent: Node, action, path_cost):
-        """ Cria um nó da árvore de procura. """
-        return Node.child_node(parent, action, state) # new node
         
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
@@ -286,22 +278,10 @@ class Piece():
         else:
             return False
 
-def generate_tree(problem, root):
-    root_node = Node(root)
-    actions = problem.actions(root)
-    # in every action, there a subarray with 2 strings that represent the possible rotations
-    for i in range(len(actions)):
-        for j in range(len(actions[i])):
-            for k in range(len(actions[i][j])):
-                if actions[i][j][k] is not None:
-                    child = problem.result(root, (i, j, k))
-                    child_node = Node(child)
-                    root_node.add_child(child_node)
+def generate_tree(problem, node):
+    node = Node(node)
+    actions = problem.actions(node.state)
 
-    # print size of children array
-    print(len(root_node.children))
-    print(root_node.children[0].state.board.print())
-    return root_node
 
 if __name__ == "__main__":
     # TODO:
@@ -370,13 +350,8 @@ if __name__ == "__main__":
     board = Board.parse_instance(input_string)
     problem = PipeMania(board, board)
     print(board.print())
-    #print(problem.actions(PipeManiaState(board)))
-    #goal_node = depth_first_tree_search(problem)
-    # criar node, percorrer actions, criar child nodes, verificar se é goal, se for, return node
+    print(problem.actions(PipeManiaState(board)))
     
-    print("Root node:")
-    root_state = PipeManiaState(board)
-    tree = generate_tree(problem, root_state)
     #print("Is goal?", problem.goal_test(goal_node.state))
     #print("Solution:\n", goal_node.solution(), sep="")
     pass
