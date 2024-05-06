@@ -273,6 +273,7 @@ class Board:
         if piece in ('LH', 'LV'):
             return ['LV']
 
+    # knowing the upper neighbor is in the correct orientation, return the valid actions
     def valid_actions_with_upper_neighbor(piece: str, upper_neighbor: str):
 
         if piece in ('FC', 'FB', 'FE', 'FD'):
@@ -294,38 +295,94 @@ class Board:
                 return ['VB', 'VE']
             
         elif piece in ('LH', 'LV'):
-            if upper_neighbor in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
-                return ['LH']
-            else:
+            if upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
                 return ['LV']
+            else:
+                return ['LH']
             
         return []
-        
+    
+    # knowing the lower neighbor is in the correct orientation, return the valid actions
     def valid_actions_with_lower_neighbor(piece: str, lower_neighbor: str):
         if piece in ('FC', 'FB', 'FE', 'FD'):
             if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
-                return ['FC', 'FE', 'FD']
+                return ['FC', 'FE', 'FD'] # not connected to the upper neighbor
             elif lower_neighbor in ('BC', 'BE', 'BD', 'VC', 'VD', 'LV'):
-                return ['FB']
+                return ['FB'] # connected to the upper neighbor
+            
         if piece in ('BC', 'BB', 'BE', 'BD'):
             if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
-                return ['BB']
+                return ['BC'] # not connected to the upper neighbor
             else:
-                return ['BC', 'BE', 'BD']
+                return ['BB', 'BE', 'BD'] # connected to the upper neighbor
+            
         if piece in ('VC', 'VB', 'VE', 'VD'):
             if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
-                return ['VC', 'VD']
+                return ['VC', 'VD'] # not connected to the upper neighbor
             else:
-                return ['VB', 'VE']
+                return ['VB', 'VE'] # connected to the upper neighbor
+            
         if piece in ('LH', 'LV'):
             if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
+                return ['LH'] # not connected to the upper neighbor
+            else:
+                return ['LV'] # connected to the upper neighbor
+
+    # knowing the left neighbor is in the correct orientation, return the valid actions  
+    def valid_actions_with_left_neighbor(piece: str, left_neighbor: str):
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            if left_neighbor in ('BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
+                return ['FE']
+            elif left_neighbor in ('FC', 'FB', 'FE', 'BE', 'VC', 'VE', 'LV'):
+                return ['FB', 'FC', 'FD']
+            
+        if piece in ('BC', 'BB', 'BE', 'BD'):
+            if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
+                return ['BC', 'BE', 'BB']
+            else:
+                return ['BD']
+            
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
+                return ['VC', 'VE']
+            else:
+                return ['VB', 'VD']
+            
+        if piece in ('LH', 'LV'):
+            if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
                 return ['LH']
             else:
                 return ['LV']
 
-        
+        return []
 
+    # knowing the right neighbor is in the correct orientation, return the valid actions
+    def valid_actions_with_right_neighbor(piece: str, right_neighbor: str):
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            if right_neighbor in ('BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
+                return ['FD']
+            elif right_neighbor in ('FC', 'BE', 'VD', 'BC', 'LH'):
+                return ['FB', 'FE', 'FC']
+            
+        if piece in ('BC', 'BB', 'BE', 'BD'):
+            if right_neighbor in ('FE','BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
+                return ['BC', 'BB', 'BD']
+            else:
+                return ['BE']
+            
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            if right_neighbor in ('FE','BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
+                return ['VB', 'VD']
+            else:
+                return ['VC', 'VE']
+            
+        if piece in ('LH', 'LV'):
+            if right_neighbor in ('FE','BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
+                return ['LH']
+            else:
+                return ['LV']
 
+        return []
 
     @staticmethod
     def parse_instance(input_string: str):
