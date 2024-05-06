@@ -22,6 +22,7 @@ class Board:
 
     def __init__(self, grid):
         self.grid = grid
+        self.board = self
 
     def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
         """ Devolve os valores imediatamente acima e abaixo, respectivamente. """
@@ -173,6 +174,7 @@ class PipeMania(Problem):
         # Return the next or previous orientation based on the direction of rotation
         return rotations.get(rotation, rotation)  # Return the current rotation if not found in the dictionary
 
+
     def isValidPiece(self, piece: str, row, col) -> bool:
         if (piece == 'FC' and board.is_edge_upper(row, col) or (piece == 'FC' and board.get_value(row-1, col) == 'FB')):
             return False
@@ -205,6 +207,7 @@ class PipeMania(Problem):
         else:
             return True
 
+    # valid rotations for one position
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
         """ Returns a list of valid rotations for the given piece. """
         valid_rotations = [None, None, None]
@@ -241,8 +244,9 @@ class PipeMania(Problem):
 
         return available_actions
 
+    """
     def goal_test(self, state: PipeManiaState)-> bool:
-        """ Retorna True se 'state' é um estado objetivo. """
+        Retorna True se 'state' é um estado objetivo.
         # check for each piece if it is connected
         for row in range(len(state.board.grid)):
             for col in range(len(state.board.grid[0])):
@@ -250,6 +254,7 @@ class PipeMania(Problem):
                 if not Piece(piece).isConnected(state.board, row, col):
                     return False
         return True
+    """
     
     def result(self, state: PipeManiaState, action): # action = (row, col, clockwise)
         """ Retorna o estado resultante de executar a 'action' sobre
@@ -317,27 +322,57 @@ def expand_tree(root: Node, problem: PipeMania):
         # Calculate the number of connected pieces in the current node
         num_connected_pieces_parent = len(Board.get_connected_pieces(node.state.board))
 
-        # Explore all children
+        better_node = False
         for child in children:
-            # Calculate the number of connected pieces in the child node
-            num_connected_pieces_child = len(Board.get_connected_pieces(child.state.board))
-            
-            # Check if the number of connected pieces in the child is at least the same as the parent
-            if num_connected_pieces_child > num_connected_pieces_parent:
-                print("Exploring child with at least the same number of connected pieces.")
-                print(child.state.board.print())
-                print("Action:", child.action)
-                print("Cost:", child.path_cost)
-                print("num of connected pieces child:", num_connected_pieces_child)
-                print("num of connected pieces parent:", num_connected_pieces_parent)
-                print("\n")
+            if max((len(Board.get_connected_pieces(child.state.board)), num_connected_pieces_parent)) > num_connected_pieces_parent:
+                better_node = True
 
-                if problem.goal_test(child.state):
-                    print("Goal state found!")
-                    break
-                frontier.append(child)
-            else:
-                print("\n")
+        if better_node:
+
+            # Explore all children
+            for child in children:
+                # Calculate the number of connected pieces in the child node
+                num_connected_pieces_child = len(Board.get_connected_pieces(child.state.board))
+                
+                if num_connected_pieces_child > num_connected_pieces_parent:
+                    print("Exploring child with at least the same number of connected pieces.")
+                    print(child.state.board.print())
+                    print("Action:", child.action)
+                    print("Cost:", child.path_cost)
+                    print("num of connected pieces child:", num_connected_pieces_child)
+                    print("num of connected pieces parent:", num_connected_pieces_parent)
+                    print("\n")
+
+                    if problem.goal_test(child.state):
+                        print("Goal state found!")
+                        break
+                    frontier.append(child)
+                else:
+                    print("\n")
+        
+        else:
+            # Explore all children
+            for child in children:
+                # Calculate the number of connected pieces in the child node
+                num_connected_pieces_child = len(Board.get_connected_pieces(child.state.board))
+                
+                if num_connected_pieces_child >= num_connected_pieces_parent:
+                    print("Exploring child with at least the same number of connected pieces.")
+                    print(child.state.board.print())
+                    print("Action:", child.action)
+                    print("Cost:", child.path_cost)
+                    print("num of connected pieces child:", num_connected_pieces_child)
+                    print("num of connected pieces parent:", num_connected_pieces_parent)
+                    print("\n")
+
+                    if problem.goal_test(child.state):
+                        print("Goal state found!")
+                        break
+                    frontier.append(child)
+                else:
+                    print("\n")
+
+
         
         # Break the loop if a goal state is found
         if problem.goal_test(node.state):
