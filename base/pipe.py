@@ -31,8 +31,7 @@ class Board:
         # Grid for positions in the correct orientation
         self.validPositions = []
 
-        # Grid for missing valid neighbours around a piece 
-        self.validNeighborsMissing = [[4] * len(self.grid)] * len(self.grid[0])
+        self.validNeighborsMissing = []
 
 
 
@@ -129,19 +128,6 @@ class Board:
             print('\t'.join(row))
 
     def validatePipe(self, row: int, col: int):
-        # Descreses the number of missing neighbours on the pieces around the given position
-        print("Validating piece at position", row, col)
-        if not self.is_edge_upper(row, col):
-            self.validNeighborsMissing[row-1][col] -= 1
-        if not self.is_edge_lower(row, col):
-            self.validNeighborsMissing[row+1][col] -= 1
-        if not self.is_edge_left(row, col):
-            self.validNeighborsMissing[row][col-1] -= 1
-        if not self.is_edge_right(row, col):
-            self.validNeighborsMissing[row][col+1] -= 1
-
-        print("Valid Neighbours Missing:", self.validNeighborsMissing)
-
         # Validate piece at the given position
         self.validPositions.append((row, col))
 
@@ -177,6 +163,111 @@ class Board:
             self.grid[len(self.grid)-1][len(self.grid[0])-1] = 'VC'
             self.validatePipe(len(self.grid)-1, len(self.grid[0])-1)
 
+    def valid_upper_left_corner_actions(piece: str):
+
+        # See if it is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            return ['FB', 'FD']
+        
+        # See if it a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            return ['VB']
+        
+    def valid_upper_right_corner_actions(piece: str):
+
+         # See if it is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            return ['FB', 'FE']
+        
+        # See if it a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            return ['VE']
+        
+
+    def valid_lower_left_corner_actions(piece: str):
+
+         # See if it is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            return ['FC', 'FD']
+        
+        # See if it a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            return ['VD']
+        
+    
+    def valid_lower_right_corner_actions(piece: str):
+
+         # See if it is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            return ['FC', 'FE']
+        
+        # See if it a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            return ['VC']
+        
+    def valid_upper_edge_actions(piece: str):
+
+        # See if it is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            return ['FB', 'FD', 'FE']
+        
+        if piece in ('BC', 'BB', 'BE', 'BD'):
+            return ['BB']
+        
+        # See if it a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            return ['VB', 'VE']
+        
+        if piece in ('LH', 'LV'):
+            return ['LH']
+        
+    def valid_lower_edge_actions(piece: str):
+            
+            # See if it is a locking pipe
+            if piece in ('FC', 'FB', 'FE', 'FD'):
+                return ['FC', 'FD', 'FE']
+            
+            if piece in ('BC', 'BB', 'BE', 'BD'):
+                return ['BC']
+            
+            # See if it a return pipe
+            if piece in ('VC', 'VB', 'VE', 'VD'):
+                return ['VD', 'VC']
+            
+            if piece in ('LH', 'LV'):
+                return ['LH']
+            
+    def valid_left_edge_actions(piece: str):
+        
+        # See if it is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            return ['FC', 'FB', 'FD']
+        
+        if piece in ('BC', 'BB', 'BE', 'BD'):
+            return ['BD']
+        
+        # See if it a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            return ['VB', 'VD']
+        
+        if piece in ('LH', 'LV'):
+            return ['LV']
+        
+    def valid_right_edge_actions(piece: str):
+            
+        # See if it is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            return ['FC', 'FB', 'FE']
+        
+        if piece in ('BC', 'BB', 'BE', 'BD'):
+            return ['BE']
+        
+        # See if it a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            return ['VE', 'VC']
+        
+        if piece in ('LH', 'LV'):
+            return ['LV']
 
     @staticmethod
     def parse_instance(input_string: str):
@@ -272,18 +363,37 @@ class PipeMania(Problem):
     # valid rotations for one position
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
         """ Returns a list of valid rotations for the given piece. """
-        valid_rotations = [None, None, None]
-        if self.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 0),  row, col): # check if the anti-clockwise rotation is valid
-            valid_rotations[0] = 1 # flag to indicate that the anti-clockwise rotation is valid
-        if self.isValidPiece(piece[0] + PipeMania.rotate(piece[1], 1),  row, col): # check if the clockwise rotation is valid
-            valid_rotations[1] = 1 # flag to indicate that the clockwise rotation is valid
+        valid_rotations = []
         
-        # check 180 degree rotation
-        clockwise_rotated_piece = piece[0] + PipeMania.rotate(piece[1], 0)
-        full_rotated_piece = clockwise_rotated_piece[0] + PipeMania.rotate(clockwise_rotated_piece[1], 0)
-        if self.isValidPiece(full_rotated_piece, row, col):
-            valid_rotations[2] = 1 # flag to indicate that the 180 degree rotation is valid
+        # Check if the piece is a upper left corner
+        if self.board.is_corner_upper_left(row, col):
+            valid_rotations.append(Board.valid_upper_left_corner_actions(piece))
+        # Check if the piece is a upper right corner
+        elif self.board.is_corner_upper_right(row, col):
+            valid_rotations.append(Board.valid_upper_right_corner_actions(piece))
+        # Check if the piece is a lower left corner
+        elif self.board.is_corner_lower_left(row, col):
+            valid_rotations.append(Board.valid_lower_left_corner_actions(piece))
+        # Check if the piece is a lower right corner
+        elif self.board.is_corner_lower_right(row, col):
+            valid_rotations.append(Board.valid_lower_right_corner_actions(piece))
+        # Check if the piece is an upper edge
+        elif self.board.is_edge_upper(row, col):
+            valid_rotations.append(Board.valid_upper_edge_actions(piece))
+        # Check if the piece is a lower edge
+        elif self.board.is_edge_lower(row, col) and not (self.board.is_corner_lower_left(row, col) or self.board.is_corner_lower_right(row, col)):
+            valid_rotations.append(Board.valid_lower_edge_actions(piece))
+        # Check if the piece is a upper edge
+        elif self.board.is_edge_left(row, col) and not (self.board.is_corner_upper_left(row, col) or self.board.is_corner_upper_right(row, col)):
+            valid_rotations.append(Board.valid_left_edge_actions(piece))
+        # Check if the piece is a right edge
+        elif self.board.is_edge_right(row, col) and not (self.board.is_corner_upper_right(row, col) or self.board.is_corner_lower_right(row, col)):
+            valid_rotations.append(Board.valid_right_edge_actions(piece))
+        # Check if the piece is a left piece
+        elif self.board.is_edge_left(row, col) and not (self.board.is_corner_upper_left(row, col) or self.board.is_corner_lower_left(row, col)):
+            valid_rotations.append(Board.valid_left_edge_actions(piece))
         
+
 
         return valid_rotations
 
@@ -297,12 +407,6 @@ class PipeMania(Problem):
             for col in range(num_cols):
                 piece = state.board.get_value(row, col)
                 actions_at_position = self.get_valid_rotations(piece, row, col)
-                if actions_at_position[0] == 1: 
-                    available_actions.append((row, col, False)) # anti-clockwise rotation
-                if actions_at_position[1] == 1:
-                    available_actions.append((row, col, True)) # clockwise rotation
-                if actions_at_position[2] == 1:
-                    available_actions.append((row, col, 2))
 
         return available_actions
 
@@ -514,9 +618,6 @@ if __name__ == "__main__":
     board.print()
     print(board.validPositions)
 
-    print("\n")
-    print(board.validNeighborsMissing )
-    print("\n")
     s1 = PipeManiaState(board)
 
     

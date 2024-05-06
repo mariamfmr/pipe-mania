@@ -508,15 +508,7 @@ if __name__ == "__main__":
 
     input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
     board = Board.parse_instance(input_string)
-    board.print()
-    board.validateBorders()
-    print("\n")
-    board.print()
-    print(board.validPositions)
-
-    print("\n")
-    print(board.validNeighborsMissing )
-    print("\n")
+   
     s1 = PipeManiaState(board)
 
     
@@ -532,7 +524,7 @@ if __name__ == "__main__":
     print(Problem.goal_test(problem, s2))
 
     root = Node(PipeManiaState(board), None, None, 0)
-    #expand_tree(root, problem)
+    expand_tree(root, problem)
 
 
 
