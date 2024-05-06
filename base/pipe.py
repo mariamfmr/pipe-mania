@@ -94,6 +94,17 @@ class Board:
             return ([self.grid[row][col], vertical[0] ] in vertical_pairs) 
         else:
             return ([vertical[1], self.grid[row][col]] in vertical_pairs)
+        
+    def get_connected_pieces(self) -> list:
+        """ Retorna uma lista de peças conectadas à peça na posição (row, col). """
+        connected_pieces = []
+        # check for each piece if it is connected
+        for row in range(len(self.grid)):
+            for col in range(len(self.grid[0])):
+                piece = self.get_value(row, col)
+                if Piece(piece).isConnected(self, row, col):
+                    connected_pieces.append([row, col])
+        return connected_pieces
 
     def get_value(self, row: int, col: int) -> str:
         """ Devolve o valor na posição (row, col). """
@@ -140,7 +151,7 @@ class PipeMania(Problem):
     def __init__(self, initial_state: Board, goal_state: Board):
         """ O construtor especifica o estado inicial. """
         self.initial = initial_state
-        self.goal_state = goal_state
+        self.goal = goal_state
         self.root = Node(PipeManiaState(initial_state), None, None, 0)
 
     def rotate(rotation: str, clockwise: bool) -> str:
@@ -163,13 +174,13 @@ class PipeMania(Problem):
         return rotations.get(rotation, rotation)  # Return the current rotation if not found in the dictionary
 
     def isValidPiece(self, piece: str, row, col) -> bool:
-        if (piece == 'FC' and board.is_edge_upper(row, col)):
+        if (piece == 'FC' and board.is_edge_upper(row, col) or (piece == 'FC' and board.get_value(row-1, col) == 'FB')):
             return False
-        elif (piece == 'FB' and board.is_edge_lower(row, col)):
+        elif (piece == 'FB' and board.is_edge_lower(row, col) or (piece == 'FB' and board.get_value(row+1, col) == 'FC')):
             return False
-        elif (piece == 'FE' and board.is_edge_left(row, col)):
+        elif (piece == 'FE' and board.is_edge_left(row, col) or (piece == 'FE' and board.get_value(row, col-1) == 'FD')):
             return False
-        elif (piece == 'FD' and board.is_edge_right(row, col)):
+        elif (piece == 'FD' and board.is_edge_right(row, col) or (piece == 'FD' and board.get_value(row, col+1) == 'FE')):
             return False
         elif (piece == 'BC' and (board.is_edge_upper(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_lower_right(row, col))):
             return False
@@ -302,24 +313,38 @@ def expand_tree(root: Node, problem: PipeMania):
     while frontier:
         node = frontier.pop()
         children = node.expand(problem)  # Get the children of the current node
-        
-        # Explore all siblings of the children
+
+        # Calculate the number of connected pieces in the current node
+        num_connected_pieces_parent = len(Board.get_connected_pieces(node.state.board))
+
+        # Explore all children
         for child in children:
-            siblings = child.expand(problem)
+            # Calculate the number of connected pieces in the child node
+            num_connected_pieces_child = len(Board.get_connected_pieces(child.state.board))
             
-            # Explore each sibling
-            for sibling in siblings:
-                print(sibling.state.board.print())
-                print("Action:", sibling.action)
-                print("Cost:", sibling.path_cost)
+            # Check if the number of connected pieces in the child is at least the same as the parent
+            if num_connected_pieces_child > num_connected_pieces_parent:
+                print("Exploring child with at least the same number of connected pieces.")
+                print(child.state.board.print())
+                print("Action:", child.action)
+                print("Cost:", child.path_cost)
+                print("num of connected pieces child:", num_connected_pieces_child)
+                print("num of connected pieces parent:", num_connected_pieces_parent)
                 print("\n")
-                if problem.goal_test(sibling.state):
+
+                if problem.goal_test(child.state):
+                    print("Goal state found!")
                     break
-                frontier.append(sibling)
+                frontier.append(child)
+            else:
+                print("\n")
         
         # Break the loop if a goal state is found
         if problem.goal_test(node.state):
+            print("Goal state found at the current node!")
             break
+
+
 
 if __name__ == "__main__":
     # TODO:
@@ -385,11 +410,20 @@ if __name__ == "__main__":
     """
 
     input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
+    board = Board.parse_instance(input_string)
+    s1 = PipeManiaState(board)
+
+    
+
     goal = "FB\tVB\tVE\nBD\tBE\tLV\nFC\tFC\tFC\n"
     goal_board = Board.parse_instance(goal)
+    s2 = PipeManiaState(goal_board)
     
-    board = Board.parse_instance(input_string)
+    
     problem = PipeMania(board, goal_board)
+
+
+    print(Problem.goal_test(problem, s2))
 
     root = Node(PipeManiaState(board), None, None, 0)
     expand_tree(root, problem)
@@ -398,6 +432,6 @@ if __name__ == "__main__":
 
     #goal = breadth_first_tree_search(problem)
 
-    #print("Is goal?", problem.goal_test(goal_node.state))
+    #print("Is goal?", Problem.goal_test(problem, s2))
     #print("Solution:\n", goal_node.solution(), sep="")
     pass
