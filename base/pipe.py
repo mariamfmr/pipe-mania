@@ -274,26 +274,48 @@ class Board:
             return ['LV']
 
     def valid_actions_with_upper_neighbor(piece: str, upper_neighbor: str):
-        if piece in ('FC', 'FB', 'FE', 'FD') and upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
-            return ['FC']
-        if piece in ('FC', 'FB', 'FE', 'FD') and upper_neighbor in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
-            return ['FB', 'FE', 'FD']
-        if piece in ('BC', 'BB', 'BE', 'BD') and upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
-            return ['BC', 'BE', 'BD']
-        if piece in ('BC', 'BB', 'BE', 'BD') and upper_neighbor in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
-            return ['BB']
-        if piece in ('VC', 'VB', 'VE', 'VD') and upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
-            return ['VC', 'VD']
-        if piece in ('VC', 'VB', 'VE', 'VD') and upper_neighbor in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
-            return ['VB', 'VE']
-        if piece in ('LH', 'LV') and upper_neighbor in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
-            return ['LH']
-        if piece in ('LH', 'LV') and upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
-            return ['LV']
+
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            if upper_neighbor in ('BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
+                return ['FC']
+            elif upper_neighbor in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
+                return ['FB', 'FE', 'FD']
+            
+        elif piece in ('BC', 'BB', 'BE', 'BD'):
+            if upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
+                return ['BC', 'BE', 'BD']
+            else:
+                return ['BB']
+            
+        elif piece in ('VC', 'VB', 'VE', 'VD'):
+            if upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
+                return ['VC', 'VD']
+            else:
+                return ['VB', 'VE']
+            
+        elif piece in ('LH', 'LV'):
+            if upper_neighbor in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
+                return ['LH']
+            else:
+                return ['LV']
+            
+        return []
         
     def valid_actions_with_lower_neighbor(piece: str, lower_neighbor: str):
-        if piece in ('FC', 'FB', 'FE', 'FD') and lower_neighbor in (
-            return ['FC', 'FE', 'FD']
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
+                return ['FC', 'FE', 'FD']
+            elif lower_neighbor in ('BC', 'BE', 'BD', 'VC', 'VD', 'LV'):
+                return ['FB']
+        if piece in ('BC', 'BB', 'BE', 'BD'):
+            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
+                return ['BB']
+            else:
+                return ['BC', 'BE', 'BD']
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
+                
+        
 
 
 
