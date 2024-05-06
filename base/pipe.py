@@ -139,7 +139,7 @@ class PipeMania(Problem):
 
     def __init__(self, initial_state: Board, goal_state: Board):
         """ O construtor especifica o estado inicial. """
-        self.initial_state = initial_state
+        self.initial = initial_state
         self.goal_state = goal_state
         self.root = Node(PipeManiaState(initial_state), None, None, 0)
 
@@ -148,9 +148,16 @@ class PipeMania(Problem):
         # Define clockwise and counter-clockwise rotations for each orientation
         clockwise_rotations = {'C': 'D', 'D': 'B', 'B': 'E', 'E': 'C', 'H': 'V', 'V': 'H'}
         counter_clockwise_rotations = {'C': 'E', 'D': 'C', 'B': 'D', 'E': 'B', 'H': 'V', 'V': 'H'}
+        full_rotations = {'V': 'V', 'H': 'H', 'C': 'B', 'B': 'C', 'D': 'E', 'E': 'D'}
 
         # Select the appropriate dictionary based on the direction of rotation
-        rotations = clockwise_rotations if clockwise else counter_clockwise_rotations
+        if clockwise == 1:
+            rotations = clockwise_rotations
+        elif clockwise == 0:
+            rotations = counter_clockwise_rotations
+        elif clockwise == 2:
+            rotations = full_rotations
+
 
         # Return the next or previous orientation based on the direction of rotation
         return rotations.get(rotation, rotation)  # Return the current rotation if not found in the dictionary
@@ -303,6 +310,7 @@ def expand_tree(root: Node, problem: PipeMania):
             # Explore each sibling
             for sibling in siblings:
                 print(sibling.state.board.print())
+                print("Action:", sibling.action)
                 print("Cost:", sibling.path_cost)
                 print("\n")
                 if problem.goal_test(sibling.state):
@@ -377,10 +385,12 @@ if __name__ == "__main__":
     """
 
     input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
+    goal = "FB\tVB\tVE\nBD\tBE\tLV\nFC\tFC\tFC\n"
+    goal_board = Board.parse_instance(goal)
+    
     board = Board.parse_instance(input_string)
-    problem = PipeMania(board, board)
-    print(board.print())
-    print(problem.actions(PipeManiaState(board)))
+    problem = PipeMania(board, goal_board)
+
     root = Node(PipeManiaState(board), None, None, 0)
     expand_tree(root, problem)
 
