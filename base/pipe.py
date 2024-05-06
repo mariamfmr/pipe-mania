@@ -314,7 +314,15 @@ class Board:
                 return ['BC', 'BE', 'BD']
         if piece in ('VC', 'VB', 'VE', 'VD'):
             if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
-                
+                return ['VC', 'VD']
+            else:
+                return ['VB', 'VE']
+        if piece in ('LH', 'LV'):
+            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
+                return ['LH']
+            else:
+                return ['LV']
+
         
 
 
