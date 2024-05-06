@@ -21,9 +21,20 @@ from search import (
 class Board:
 
     def __init__(self, grid):
+
+        # Grid for the board
         self.grid = grid
+
+        # Board for the board
         self.board = self
+
+        # Grid for positions in the correct orientation
         self.validPositions = []
+
+        # Grid for missing valid neighbours around a piece 
+        self.validNeighborsMissing = [[4] * len(self.grid)] * len(self.grid[0])
+
+
 
     def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
         """ Devolve os valores imediatamente acima e abaixo, respectivamente. """
@@ -117,36 +128,54 @@ class Board:
         for row in self.grid:
             print('\t'.join(row))
 
+    def validatePipe(self, row: int, col: int):
+        # Descreses the number of missing neighbours on the pieces around the given position
+        print("Validating piece at position", row, col)
+        if not self.is_edge_upper(row, col):
+            self.validNeighborsMissing[row-1][col] -= 1
+        if not self.is_edge_lower(row, col):
+            self.validNeighborsMissing[row+1][col] -= 1
+        if not self.is_edge_left(row, col):
+            self.validNeighborsMissing[row][col-1] -= 1
+        if not self.is_edge_right(row, col):
+            self.validNeighborsMissing[row][col+1] -= 1
+
+        print("Valid Neighbours Missing:", self.validNeighborsMissing)
+
+        # Validate piece at the given position
+        self.validPositions.append((row, col))
+
     def validateBorders(self):
         # iterate upper and bottom row except corner, look for a straight pipe and change it to horizontal, validating its position
         for col in range(1, len(self.grid[0])-1):
             if self.grid[0][col] in ('LH', 'LV'):
                 self.grid[0][col] = 'LH'
-                self.validPositions.append((0, col))
+                self.validatePipe(0, col)
             if self.grid[len(self.grid)-1][col] in ('LH', 'LV'):
                 self.grid[len(self.grid)-1][col] = 'LH'
-                self.validPositions.append((self.grid-1, col))
+                self.validatePipe(len(self.grid)-1, col)
         # iterate left and right column except corner, look for a straight pipe and change it to vertical, validating its position
         for row in range(1, len(self.grid)-1):
             if self.grid[row][0] in ('LH', 'LV'):
                 self.grid[row][0] = 'LV'
-                self.validPositions.append((row, 0))
+                self.validatePipe(row, 0)
             if self.grid[row][len(self.grid[0])-1] in ('LH', 'LV'):
                 self.grid[row][len(self.grid[0])-1] = 'LV'
-                self.validPositions.append((row, len(self.grid[0])-1))
+                print("A validar peça na posição", row, len(self.grid[0])-1)
+                self.validatePipe(row, len(self.grid[0])-1)
         # iterate over corners, look for a "L" pipe and change it to its correct orientation, validating its position
         if self.grid[0][0] in ('VC', 'VB', 'VE', 'VD'):
             self.grid[0][0] = 'VB'
-            self.validPositions.append((0, 0))
+            self.validatePipe(0, 0)
         if self.grid[0][len(self.grid[0])-1] in ('VC', 'VB', 'VE', 'VD'):
             self.grid[0][len(self.grid[0])-1] = 'VE'
-            self.validPositions.append((0, len(self.grid[0])-1))
+            self.validatePipe(0, len(self.grid[0])-1)
         if self.grid[len(self.grid)-1][0] in ('VC', 'VB', 'VE', 'VD'):
             self.grid[len(self.grid)-1][0] = 'VD'
-            self.validPositions.append((len(self.grid)-1, 0))
+            self.validatePipe(len(self.grid)-1, 0)
         if self.grid[len(self.grid)-1][len(self.grid[0])-1] in ('VC', 'VB', 'VE', 'VD'):
             self.grid[len(self.grid)-1][len(self.grid[0])-1] = 'VC'
-            self.validPositions.append((len(self.grid)-1, len(self.grid[0])-1))
+            self.validatePipe(len(self.grid)-1, len(self.grid[0])-1)
 
 
     @staticmethod
@@ -484,6 +513,10 @@ if __name__ == "__main__":
     print("\n")
     board.print()
     print(board.validPositions)
+
+    print("\n")
+    print(board.validNeighborsMissing )
+    print("\n")
     s1 = PipeManiaState(board)
 
     
