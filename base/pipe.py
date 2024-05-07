@@ -22,6 +22,13 @@ class Board:
 
     def __init__(self, grid):
 
+        """
+        Initializes a Board object.
+
+        Args:
+            grid (list): The grid layout representing the board.
+        """
+
         # Grid for the board
         self.grid = grid
 
@@ -33,61 +40,110 @@ class Board:
 
         self.validNeighborsMissing = []
 
-    def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
-        """ Devolve os valores imediatamente acima e abaixo, respectivamente. """
-        above = None if row == 0 else self.grid[row - 1][col]
-        below = None if row == len(self.grid) - 1 else self.grid[row + 1][col]
-        return above, below
-
-    def adjacent_horizontal_values(self, row: int, col: int) -> (str, str):
-        """ Devolve os valores imediatamente à esquerda e à direita, respectivamente. """
-        left = None if col == 0 else self.grid[row][col - 1]
-        right = None if col == len(self.grid[0]) - 1 else self.grid[row][col + 1]
-        return left, right
-    
     def is_corner_upper_right(self, row: int, col: int) -> bool:
-        """ Verifica se a posição é um canto superior direito. """
+        """
+        Checks if the position is the upper right corner of the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            bool: True if the position is the upper right corner, False otherwise.
+        """
         return row == 0 and col == len(self.grid[0]) - 1
     
     def is_corner_upper_left(self, row: int, col: int) -> bool:
-        """ Verifica se a posição é um canto superior esquerdo. """
+        """
+        Checks if the position is the upper left corner of the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            bool: True if the position is the upper left corner, False otherwise.
+        """
         return row == 0 and col == 0
     
     def is_corner_lower_right(self, row: int, col: int) -> bool:
-        """ Verifica se a posição é um canto inferior direito. """
+        """
+        Checks if the position is the lower right corner of the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            bool: True if the position is the lower right corner, False otherwise.
+        """
         return row == len(self.grid) - 1 and col == len(self.grid[0]) - 1
     
     def is_corner_lower_left(self, row: int, col: int) -> bool:
-        """ Verifica se a posição é um canto inferior esquerdo. """
+        """
+        Checks if the position is the lower left corner of the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            bool: True if the position is the lower left corner, False otherwise.
+        """
         return row == len(self.grid) - 1 and col == 0
     
     def is_edge_upper(self, row: int, col: int) -> bool:
-        """ Verifica se a posição é uma aresta superior. """
+        """
+        Checks if the position is on the upper edge of the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            bool: True if the position is on the upper edge, False otherwise.
+        """
         return row == 0
     
     def is_edge_lower(self, row: int, col: int) -> bool:
-        """ Verifica se a posição é uma aresta inferior. """
+        """
+        Checks if the position is on the lower edge of the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            bool: True if the position is on the lower edge, False otherwise.
+        """
         return row == len(self.grid) - 1
     
     def is_edge_left(self, row: int, col: int) -> bool:
-        """ Verifica se a posição é uma aresta esquerda. """
+        """
+        Checks if the position is on the left edge of the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            bool: True if the position is on the left edge, False otherwise.
+        """
         return col == 0
     
     def is_edge_right(self, row: int, col: int) -> bool:
-        """ Verifica se a posição é uma aresta direita. """
+        """
+        Checks if the position is on the right edge of the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            bool: True if the position is on the right edge, False otherwise.
+        """
         return col == len(self.grid[0]) - 1          
 
-    def is_connected_vertical(self, row: int, col: int, isUpper: bool) -> bool:
-        """ Verifica se a peça na posição (row, col) está ligada acima. """
-        vertical_pairs = [['FC', 'BB'], ['FC', 'BE'], ['FC', 'BD'], ['FC', 'VB'], ['FC', 'VE'], ['FC', 'LV'],
-                          ['BC', 'FB'], ['BC', 'BB'], ['BC', 'BE'], ['BC', 'BD'], ['BC', 'VB'], ['BC', 'VE'], ['BC', 'LV'], 
-                          ['BE', 'BD'], ['BE', 'VB'], ['BE', 'VE'], ['BE', 'LV'], ['BD', 'FB'], ['BD', 'VB'], ['BD', 'VE'], ['BD', 'LV'], ['VC', 'FB'], ['VC', 'BB'], ['VC', 'BD'], ['VC', 'VB'], ['VC', 'VE'], ['VC', 'LV'], ['VD', 'FB'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'BD'], ['VD', 'VB'], ['VD', 'VE'], ['VD', 'LV'], ['LV', 'FB'], ['LV', 'BB'], ['LV', 'BE'], ['LV', 'BD'], ['LV', 'VB'], ['LV', 'VE'], ['LV', 'LV']]
-        vertical = self.adjacent_vertical_values(row, col) # above, below
-        if not isUpper:
-            return ([self.grid[row][col], vertical[0] ] in vertical_pairs) 
-        else:
-            return ([vertical[1], self.grid[row][col]] in vertical_pairs)
-        
     def get_value(self, row: int, col: int) -> str:
         """
         Gets the value (piece identifier) at the given position in the grid.
@@ -708,7 +764,6 @@ class Board:
 
         return valid_rot
     
-    # returns valid positions based on neighbors that are already in their final position
     def get_valid_rotations_neighbors(self, piece: str, row: int, col: int) -> list:
         """
         Returns valid positions based on neighbors that are already in their final position.
@@ -763,7 +818,6 @@ class Board:
 
         return intersect_rotations
 
-    # valid rotations for one position
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
         """
         Returns valid rotations for a piece considering both its position and neighboring pieces.
@@ -805,8 +859,14 @@ class Board:
 
     @staticmethod
     def parse_instance(input_string: str):
-        """Lê a instância do problema a partir de uma string no formato especificado
-        e retorna uma instância da classe Board.
+        """
+        Parses an input string representing the problem instance and returns a Board instance.
+
+        Args:
+            input_string (str): The input string containing the grid layout.
+
+        Returns:
+            Board: An instance of the Board class representing the parsed grid.
         """
         grid = []
         lines = input_string.strip().split('\n')
@@ -842,60 +902,16 @@ class PipeMania(Problem):
         self.goal = goal_state
         self.root = Node(PipeManiaState(initial_state), None, None, 0)
 
-    def rotate(rotation: str, clockwise: bool) -> str:
-        """Rotate the given string representing orientation clockwise or counter-clockwise."""
-        # Define clockwise and counter-clockwise rotations for each orientation
-        clockwise_rotations = {'C': 'D', 'D': 'B', 'B': 'E', 'E': 'C', 'H': 'V', 'V': 'H'}
-        counter_clockwise_rotations = {'C': 'E', 'D': 'C', 'B': 'D', 'E': 'B', 'H': 'V', 'V': 'H'}
-        full_rotations = {'V': 'V', 'H': 'H', 'C': 'B', 'B': 'C', 'D': 'E', 'E': 'D'}
-
-        # Select the appropriate dictionary based on the direction of rotation
-        if clockwise == 1:
-            rotations = clockwise_rotations
-        elif clockwise == 0:
-            rotations = counter_clockwise_rotations
-        elif clockwise == 2:
-            rotations = full_rotations
-
-
-        # Return the next or previous orientation based on the direction of rotation
-        return rotations.get(rotation, rotation)  # Return the current rotation if not found in the dictionary
-
-
-    def isValidPiece(self, piece: str, row, col) -> bool:
-        if (piece == 'FC' and board.is_edge_upper(row, col) or (piece == 'FC' and board.get_value(row-1, col) == 'FB')):
-            return False
-        elif (piece == 'FB' and board.is_edge_lower(row, col) or (piece == 'FB' and board.get_value(row+1, col) == 'FC')):
-            return False
-        elif (piece == 'FE' and board.is_edge_left(row, col) or (piece == 'FE' and board.get_value(row, col-1) == 'FD')):
-            return False
-        elif (piece == 'FD' and board.is_edge_right(row, col) or (piece == 'FD' and board.get_value(row, col+1) == 'FE')):
-            return False
-        elif (piece == 'BC' and (board.is_edge_upper(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_lower_right(row, col))):
-            return False
-        elif (piece == 'BB' and (board.is_edge_lower(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_lower_right(row, col))):
-            return False
-        elif (piece == 'BE' and (board.is_edge_left(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col))):
-            return False
-        elif (piece == 'BD' and (board.is_edge_right(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_lower_left(row, col))):
-            return False
-        elif (piece == 'VC' and (board.is_edge_upper(row, col) or board.is_edge_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_upper_left(row, col))):
-            return False
-        elif (piece == 'VB' and (board.is_edge_lower(row, col) or board.is_edge_right(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_lower_right(row, col))):
-            return False
-        elif (piece == 'VE' and (board.is_edge_lower(row, col) or board.is_edge_left(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_lower_left(row, col) or board.is_corner_lower_right(row, col))):
-            return False
-        elif (piece == 'VD' and (board.is_edge_upper(row, col) or board.is_edge_right(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col))):
-            return False
-        elif (piece == 'LH' and (board.is_edge_right(row, col) or board.is_edge_left(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col) or board.is_corner_lower_left(row, col))):
-            return False
-        elif (piece == 'LV' and (board.is_edge_upper(row, col) or board.is_edge_lower(row, col) or board.is_corner_upper_left(row, col) or board.is_corner_upper_right(row, col) or board.is_corner_lower_right(row, col) or board.is_corner_lower_left(row, col))):
-            return False
-        else:
-            return True
-
     def actions(self, state: PipeManiaState):
-        """ Returns a 3D array of actions that can be executed from the given state. """
+        """
+        Returns a list of actions that can be executed from the given state.
+
+        Args:
+            state (PipeManiaState): The current state of the Pipe Mania puzzle.
+
+        Returns:
+            list: A list of actions that can be executed from the given state.
+        """
         num_rows, num_cols = len(state.board.grid), len(state.board.grid[0])
         available_actions = []
 
@@ -906,6 +922,7 @@ class PipeMania(Problem):
                     piece = state.board.get_value(row, col)
                     actions_at_position = state.board.get_valid_rotations(piece, row, col)
                     available_actions.extend(actions_at_position)
+
         return available_actions
         
         
