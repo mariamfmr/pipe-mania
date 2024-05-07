@@ -479,10 +479,14 @@ class Board:
         valid_rotations = []
         if len(valid_rotations_neighbors) != 0 and len(valid_rotations_pos) != 0:
             valid_rotations = [(value, row, col) for value in valid_rotations_pos if value in valid_rotations_neighbors]
+
         elif len(valid_rotations_pos) == 0 and len(valid_rotations_neighbors) != 0:
             valid_rotations = [(value, row, col) for value in valid_rotations_neighbors]
 
-        
+        # if there is only one valid rotation, validate the position
+        if len(valid_rotations) == 1:
+            print("POSICAO UNICA ", row, col)
+            
         return valid_rotations
 
     @staticmethod
@@ -589,9 +593,12 @@ class PipeMania(Problem):
                     actions_at_position = state.board.get_valid_rotations(piece, row, col)
                     available_actions.extend(actions_at_position)
         return available_actions
-
-
+        
+        
     def goal_test(self, state: PipeManiaState)-> bool:
+        if (state.board.grid == self.goal.grid) and (state.board.valid_positions == len(self.goal.grid) * len(self.goal.grid[0])):
+            print("Goal reached")
+            return True
         return False
     
     def result(self, state: PipeManiaState, action): # action = (new_rot, row, col)

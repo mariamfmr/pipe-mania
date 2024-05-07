@@ -216,6 +216,7 @@ def depth_first_tree_search(problem):
     while frontier:
         node = frontier.pop()
         if problem.goal_test(node.state):
+            print("cheguei")
             return node
         
         print("Cost:",node.path_cost)
