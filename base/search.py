@@ -214,16 +214,17 @@ def depth_first_tree_search(problem):
 
     while frontier:
         node = frontier.pop()
-        if problem.goal_test(node.state):
-            print("cheguei")
-            return node
-        
+
         print("Cost:",node.path_cost)
         node.state.board.print()
         print("This action lead to this state:",node.action) 
         print("ACTIONS AVAILABLE:",problem.actions(node.state))
         print("FIXED POS", node.state.board.valid_positions)
         print("\n")
+
+        if problem.goal_test(node.state):
+            return node
+        
         frontier.extend(node.expand(problem))
     return None
 

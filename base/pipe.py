@@ -950,11 +950,9 @@ class PipeManiaState:
 
 class PipeMania(Problem):
 
-    def __init__(self, initial_state: Board, goal_state: Board):
+    def __init__(self, initial_state: Board):
         """ O construtor especifica o estado inicial. """
         self.initial = initial_state
-        self.goal = goal_state
-        self.root = Node(PipeManiaState(initial_state), None, None, 0)
 
     def actions(self, state: PipeManiaState):
         """
@@ -1032,33 +1030,11 @@ if __name__ == "__main__":
     input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
 
     board = Board.parse_instance(input_string)
-    board.print()
     board.validateBorders() 
-    print("\n")
-    board.print()
-    
-    s1 = PipeManiaState(board)
-    
-    goal = "FB\tVB\tVE\nBD\tBE\tLV\nFC\tFC\tFC\n"
-    goal_board = Board.parse_instance(goal)
-    s2 = PipeManiaState(goal_board)
-    
-    
-    problem = PipeMania(board, goal_board)
-    print(board.valid_positions)
+        
+    problem = PipeMania(board)
 
-    root = Node(PipeManiaState(board), None, None, 0)
-    #print(problem.actions(root.state))
-    #expand_tree(problem, root)
     
     goal_node = depth_first_tree_search(problem)
-    #goal_node.state.board.print()
-    #goal_node2 = breadth_first_tree_search(problem)
-
-
-
-    #goal = breadth_first_tree_search(problem)
-
-    #print("Is goal?", Problem.goal_test(problem, s2))
-    #print("Solution:\n", goal_node.solution(), sep="")
+    goal_node.state.board.print()
     pass
