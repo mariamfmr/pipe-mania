@@ -853,9 +853,8 @@ class Board:
             valid_rotations = [(value, row, col) for value in valid_rotations_neighbors]
 
         # if there is only one valid rotation, we can conclude that the piece is in the correct position
-        if len(valid_rotations) == 1:
-            
-        return valid_rotations
+        if len(valid_rotations) == 1:      
+            return valid_rotations
 
     @staticmethod
     def parse_instance(input_string: str):
@@ -927,10 +926,21 @@ class PipeMania(Problem):
         
         
     def goal_test(self, state: PipeManiaState)-> bool:
-        if (state.board.grid == self.goal.grid) and (state.board.valid_positions == len(self.goal.grid) * len(self.goal.grid[0])):
+        """
+        Checks if the given state is a goal state.
+
+        Args:
+            state (PipeManiaState): The state to be tested.
+
+        Returns:
+            bool: True if the state is a goal state, False otherwise.
+        """
+        # See if all pieces of the board are in the correct position
+        if len(state.board.valid_positions) == len(state.board.grid) * len(state.board.grid[0]):
             print("Goal reached")
             return True
-        return False
+        else:
+            return False
     
     def result(self, state: PipeManiaState, action): # action = (new_rot, row, col)
         """ Retorna o estado resultante de executar a 'action' sobre
