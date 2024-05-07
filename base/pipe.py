@@ -422,7 +422,12 @@ class Board:
         elif self.board.is_edge_left(row, col) and not (self.board.is_corner_upper_left(row, col) or self.board.is_corner_lower_left(row, col)):
             valid_rotations.append(Board.valid_left_edge_actions(piece))
 
-        return valid_rotations
+        # Join all the valid rotations into single array
+        valid_rot = []
+        for rot in valid_rotations:
+            valid_rot.extend(rot)
+
+        return valid_rot
     
     # returns valid positions based on neighbors that are already in their final position
     def get_valid_rotations_neighbors(self, piece: str, row: int, col: int) -> list:
@@ -447,22 +452,29 @@ class Board:
             if self.board.is_fixed_piece(row, col+1):
                 valid_rotations.append(Board.valid_actions_with_right_neighbor(piece, board.get_value(row, col+1)))
 
-        return valid_rotations
+
+        # Intersection of the valid rotations
+        intersect_rotations = []    
+        size = len(valid_rotations)
+        if size > 0:
+            for rot in valid_rotations[0]:
+                for i in range(0, size):
+                    if rot in valid_rotations[i]:
+                        intersect_rotations.append(rot)
+
+        return intersect_rotations
 
     # valid rotations for one position
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
         """ Returns a list of valid rotations for the given piece. """
-        valid_rotations_pos = []
-        valid_rotations_pos.append(self.get_valid_rotations_pos(piece, row, col)) # get the valid rotations based on the position of the piece
+        valid_rotations_pos = self.get_valid_rotations_pos(piece, row, col) # get the valid rotations based on the position of the piece
 
-        valid_rotations_neighbors = []
-        valid_rotations_neighbors.append(self.get_valid_rotations_neighbors(piece, row, col))
-
+        valid_rotations_neighbors = self.get_valid_rotations_neighbors(piece, row, col) # get the valid rotations based on the neighbors of the piece
         # do the intersection of the two lists
         valid_rotations = []
-        for rot in valid_rotations_pos[0][0]:
-            if rot in valid_rotations_neighbors[0][0]:
-                valid_rotations.append(rot)
+        if valid_rotations_neighbors != None and valid_rotations_pos != None:
+            valid_rotations = [(value, row, col) for value in valid_rotations_pos if value in valid_rotations_neighbors]
+
 
         return valid_rotations
 
@@ -566,8 +578,8 @@ class PipeMania(Problem):
         for row in range(num_rows):
             for col in range(num_cols):
                 piece = state.board.get_value(row, col)
-                actions_at_position = self.get_valid_rotations(piece, row, col)
-
+                actions_at_position = state.board.get_valid_rotations(piece, row, col)
+                available_actions.append(actions_at_position)
         return available_actions
 
     """
@@ -732,6 +744,7 @@ if __name__ == "__main__":
     problem = PipeMania(board, goal_board)
     print(board.valid_positions)
     print(board.get_valid_rotations(s1.get_value(0,1), 0, 1))
+    print(problem.actions(s1))
 
 
     #root = Node(PipeManiaState(board), None, None, 0)
