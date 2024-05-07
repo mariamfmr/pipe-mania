@@ -222,8 +222,6 @@ def depth_first_tree_search(problem):
         print("Cost:",node.path_cost)
         node.state.board.print()
         print("This action lead to this state:",node.action) 
-        print("ACTIONS AVAILABLE:",problem.actions(node.state))
-        print("FIXED POS", node.state.board.valid_positions)
         print("\n")
         frontier.extend(node.expand(problem))
     return None

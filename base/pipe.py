@@ -192,6 +192,8 @@ class Board:
             # If not, add it to the list
             self.valid_positions.append((row, col))
 
+            print("Validated pipes: ", self.valid_positions)
+
     def validateBorders(self):
 
         """
@@ -853,8 +855,10 @@ class Board:
             valid_rotations = [(value, row, col) for value in valid_rotations_neighbors]
 
         # if there is only one valid rotation, we can conclude that the piece is in the correct position
-        if len(valid_rotations) == 1:      
-            return valid_rotations
+        if len(valid_rotations) == 1: 
+            self.validatePipe(row, col)     
+            
+        return valid_rotations
 
     @staticmethod
     def parse_instance(input_string: str):
@@ -936,11 +940,12 @@ class PipeMania(Problem):
             bool: True if the state is a goal state, False otherwise.
         """
         # See if all pieces of the board are in the correct position
-        if len(state.board.valid_positions) == len(state.board.grid) * len(state.board.grid[0]):
-            print("Goal reached")
-            return True
-        else:
-            return False
+        if len(state.board.valid_positions) > 0:
+            if len(state.board.valid_positions) == len(state.board.grid) * len(state.board.grid[0]):
+                print("Goal reached")
+                return True
+            else:
+                return False
     
     def result(self, state: PipeManiaState, action): # action = (new_rot, row, col)
         """ Retorna o estado resultante de executar a 'action' sobre
