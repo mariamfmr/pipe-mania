@@ -119,24 +119,55 @@ class Board:
         return connected_pieces
 
     def get_value(self, row: int, col: int) -> str:
-        """ Devolve o valor na posição (row, col). """
+        """
+        Gets the value (piece identifier) at the given position in the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            str: The piece identifier at the specified position.
+        """
         return self.grid[row][col]
 
     def print(self):
-        """ Imprime a grelha. """
+        """
+        Prints the grid layout.
+        """
         for row in self.grid:
             print('\t'.join(row))
 
     def is_fixed_piece(self, row: int, col: int) -> bool:
-        """ Verifica se a posição está correta. """
+        """
+        Checks if the piece at the given position is fixed (already in its final position).
+
+        Args:
+            row (int): The row index of the piece.
+            col (int): The column index of the piece.
+
+        Returns:
+            bool: True if the piece is fixed, False otherwise.
+        """
         return (row, col) in self.valid_positions
 
     def validatePipe(self, row: int, col: int):
-        # Validate piece at the given position
+        """
+        Validates the pipe at the given position.
+
+        Args:
+            row (int): The row index of the pipe.
+            col (int): The column index of the pipe.
+        """
+
+        # Check if the piece is already in the list of valid positions
         if not self.is_fixed_piece(row, col):
+
+            # If not, add it to the list
             self.valid_positions.append((row, col))
 
     def validateBorders(self):
+
         """
         Validates the pipes at the borders of the grid to ensure correct orientation and position.
 
