@@ -432,25 +432,35 @@ class Board:
     
     # returns valid positions based on neighbors that are already in their final position
     def get_valid_rotations_neighbors(self, piece: str, row: int, col: int) -> list:
+
         valid_rotations = []
-        # See if upper neighbor is in the correct orientation
+
+        # See if upper neighbor is in the correct orientation 
         if row > 0:
             if self.board.is_fixed_piece(row-1, col):  
+
+                # Get the valid rotations based on the upper neighbor
                 valid_rotations.append(Board.valid_actions_with_upper_neighbor(piece, self.board.get_value(row-1, col)))
 
         # See if lower neighbor is in the correct orientation
         if row < len(self.board.grid) - 1:
             if self.board.is_fixed_piece(row+1, col):
+
+                # Get the valid rotations based on the lower neighbor
                 valid_rotations.append(Board.valid_actions_with_lower_neighbor(piece, self.board.get_value(row+1, col)))
         
         # See if left neighbor is in the correct orientation
         if col > 0:
             if self.board.is_fixed_piece(row, col-1):
+
+                # Get the valid rotations based on the left neighbor
                 valid_rotations.append(Board.valid_actions_with_left_neighbor(piece, self.board.get_value(row, col-1)))
 
         # See if right neighbor is in the correct orientation
         if col < len(self.board.grid[0]) - 1:
             if self.board.is_fixed_piece(row, col+1):
+
+                # Get the valid rotations based on the right neighbor
                 valid_rotations.append(Board.valid_actions_with_right_neighbor(piece, self.board.get_value(row, col+1)))
 
 
@@ -467,23 +477,33 @@ class Board:
 
     # valid rotations for one position
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
-        """ Returns a list of valid rotations for the given piece. """
-        valid_rotations_pos = self.get_valid_rotations_pos(piece, row, col) # get the valid rotations based on the position of the piece
+        
+        # Get the valid rotations based on the position of the piece (if it is in the border)
+        valid_rotations_pos = self.get_valid_rotations_pos(piece, row, col) 
         if row == 1 and col == 1:
             print("V P: ",valid_rotations_pos)
 
+        # Get the valid rotations based on the neighbors of the piece that are already in the correct position
         valid_rotations_neighbors = self.get_valid_rotations_neighbors(piece, row, col) # get the valid rotations based on the neighbors of the piece
         if row == 1 and col == 1:
             print("V N: ", valid_rotations_neighbors)
+
         # do the intersection of the two lists
         valid_rotations = []
+
+        # See if the piece is in the outer border
         if len(valid_rotations_neighbors) != 0 and len(valid_rotations_pos) != 0:
+            
+            # If so, the valid rotations are the intersection of the two lists
             valid_rotations = [(value, row, col) for value in valid_rotations_pos if value in valid_rotations_neighbors]
 
+        # If the piece is not in the outer border
         elif len(valid_rotations_pos) == 0 and len(valid_rotations_neighbors) != 0:
+
+            # If so, the valid rotations are the list of valid rotations based on the neighbors
             valid_rotations = [(value, row, col) for value in valid_rotations_neighbors]
 
-        # if there is only one valid rotation, validate the position
+        # if there is only one valid rotation, we can conclude that the piece is in the correct position
         if len(valid_rotations) == 1:
             print("POSICAO UNICA ", row, col)
             
