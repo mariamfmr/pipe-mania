@@ -579,7 +579,7 @@ class PipeMania(Problem):
             for col in range(num_cols):
                 piece = state.board.get_value(row, col)
                 actions_at_position = state.board.get_valid_rotations(piece, row, col)
-                available_actions.append(actions_at_position)
+                available_actions.extend(actions_at_position)
         return available_actions
 
     """
@@ -594,16 +594,16 @@ class PipeMania(Problem):
         return True
     """
     
-    def result(self, state: PipeManiaState, action): # action = (row, col, clockwise)
+    def result(self, state: PipeManiaState, action): # action = (new_rot, row, col)
         """ Retorna o estado resultante de executar a 'action' sobre
         'state' passado como argumento. A ação a executar deve ser uma
         das presentes na lista obtida pela execução de
         self.actions(state). """
         # Create a copy of the board to modify
         new_board = Board([row[:] for row in state.board.grid])
-        piece = new_board.get_value(action[0], action[1])   # get the piece at the given position
-        rotated_piece = piece[0] + PipeMania.rotate(piece[1], action[2]) # rotate the piece at the given position clockwise or anti-clockwise
-        new_board.grid[action[0]][action[1]] = rotated_piece
+        new_board.grid[action[1]][action[2]] = action[0]
+        new_board.validatePipe(action[1], action[2])
+        print("validada a peça na posição", action[1], action[2])
         
         # Create and return a new state with the modified board
         return PipeManiaState(new_board)
