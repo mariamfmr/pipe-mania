@@ -137,37 +137,105 @@ class Board:
             self.valid_positions.append((row, col))
 
     def validateBorders(self):
-        # iterate upper and bottom row except corner, look for a straight pipe and change it to horizontal, validating its position
+        """
+        Validates the pipes at the borders of the grid to ensure correct orientation and position.
+
+        Iterates over the upper and bottom rows, and left and right columns, excluding corners,
+        looking for straight pipes and adjusts them to horizontal or vertical orientation accordingly,
+        while validating their positions.
+
+        Iterates over the corner pipes, adjusting them to the correct orientation and validating their positions.
+        """
+
+        # Iterate over upper and bottom rows except corners
         for col in range(1, len(self.grid[0])-1):
+
+            # Check if the piece is a straight pipe in the upper row
             if self.grid[0][col] in ('LH', 'LV'):
+
+                # Change the piece to horizontal
                 self.grid[0][col] = 'LH'
+
+                # Validate the position of the piece
                 self.validatePipe(0, col)
+            
+            # Check if the piece is a straight pipe in the bottom row
             if self.grid[len(self.grid)-1][col] in ('LH', 'LV'):
+
+                # Change the piece to horizontal
                 self.grid[len(self.grid)-1][col] = 'LH'
+
+                # Validate the position of the piece
                 self.validatePipe(len(self.grid)-1, col)
-        # iterate left and right column except corner, look for a straight pipe and change it to vertical, validating its position
+
+        # Iterate over left and right columns except corners
         for row in range(1, len(self.grid)-1):
+
+            # Check if the piece is a straight pipe in the left column
             if self.grid[row][0] in ('LH', 'LV'):
+
+                # Change the piece to vertical
                 self.grid[row][0] = 'LV'
+
+                # Validate the position of the piece
                 self.validatePipe(row, 0)
+
+            # Check if the piece is a straight pipe in the right column
             if self.grid[row][len(self.grid[0])-1] in ('LH', 'LV'):
+
+                # Change the piece to vertical
                 self.grid[row][len(self.grid[0])-1] = 'LV'
+
+                # Validate the position of the piece
                 self.validatePipe(row, len(self.grid[0])-1)
-        # iterate over corners, look for a "L" pipe and change it to its correct orientation, validating its position
+
+        # See if the upper left corner is a return pipe
         if self.grid[0][0] in ('VC', 'VB', 'VE', 'VD'):
+
+            # Change the piece to correct orientation
             self.grid[0][0] = 'VB'
+
+            # Validate the position of the piece
             self.validatePipe(0, 0)
+
+        # See if the upper right corner is a return pipe
         if self.grid[0][len(self.grid[0])-1] in ('VC', 'VB', 'VE', 'VD'):
+
+            # Change the piece to correct orientation
             self.grid[0][len(self.grid[0])-1] = 'VE'
+
+            # Validate the position of the piece
             self.validatePipe(0, len(self.grid[0])-1)
+
+        # See if the lower left corner is a return pipe
         if self.grid[len(self.grid)-1][0] in ('VC', 'VB', 'VE', 'VD'):
+
+            # Change the piece to correct orientation
             self.grid[len(self.grid)-1][0] = 'VD'
+
+            # Validate the position of the piece
             self.validatePipe(len(self.grid)-1, 0)
+
+        # See if the lower right corner is a return pipe
         if self.grid[len(self.grid)-1][len(self.grid[0])-1] in ('VC', 'VB', 'VE', 'VD'):
+
+            # Change the piece to correct orientation
             self.grid[len(self.grid)-1][len(self.grid[0])-1] = 'VC'
+
+            # Validate the position of the piece
             self.validatePipe(len(self.grid)-1, len(self.grid[0])-1)
 
     def valid_upper_left_corner_actions(piece: str):
+
+        """
+        Determines valid actions for a piece located at the upper left corner of the grid.
+
+        Args:
+            piece (str): The piece identifier.
+
+        Returns:
+            list: A list of valid actions for the piece at the upper left corner.
+        """
 
         # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
@@ -179,6 +247,16 @@ class Board:
         
     def valid_upper_right_corner_actions(piece: str):
 
+        """
+        Determines valid actions for a piece located at the upper right corner of the grid.
+
+        Args:
+            piece (str): The piece identifier.
+
+        Returns:
+            list: A list of valid actions for the piece at the upper right corner.
+        """
+
          # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FB', 'FE']
@@ -187,8 +265,17 @@ class Board:
         if piece in ('VC', 'VB', 'VE', 'VD'):
             return ['VE']
         
-
     def valid_lower_left_corner_actions(piece: str):
+        
+        """
+        Determines valid actions for a piece located at the lower left corner of the grid.
+
+        Args:
+            piece (str): The piece identifier.
+
+        Returns:
+            list: A list of valid actions for the piece at the lower left corner.
+        """
 
          # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
@@ -197,9 +284,18 @@ class Board:
         # See if it a return pipe
         if piece in ('VC', 'VB', 'VE', 'VD'):
             return ['VD']
-        
-    
+         
     def valid_lower_right_corner_actions(piece: str):
+
+        """
+        Determines valid actions for a piece located at the lower right corner of the grid.
+
+        Args:
+            piece (str): The piece identifier.
+
+        Returns:
+            list: A list of valid actions for the piece at the lower right corner.
+        """
 
          # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
@@ -211,10 +307,21 @@ class Board:
         
     def valid_upper_edge_actions(piece: str):
 
+        """
+        Determines valid actions for a piece located at the upper edge of the grid.
+
+        Args:
+            piece (str): The piece identifier.
+
+        Returns:
+            list: A list of valid actions for the piece at the upper edge.
+        """
+
         # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FB', 'FD', 'FE']
         
+        # See if it is a fork pipe
         if piece in ('BC', 'BB', 'BE', 'BD'):
             return ['BB']
         
@@ -222,31 +329,55 @@ class Board:
         if piece in ('VC', 'VB', 'VE', 'VD'):
             return ['VB', 'VE']
         
+        # See if it is a straight pipe
         if piece in ('LH', 'LV'):
             return ['LH']
         
     def valid_lower_edge_actions(piece: str):
             
-            # See if it is a locking pipe
-            if piece in ('FC', 'FB', 'FE', 'FD'):
-                return ['FC', 'FD', 'FE']
+        """
+        Determines valid actions for a piece located at the lower edge of the grid.
+
+        Args:
+            piece (str): The piece identifier.
+
+        Returns:
+            list: A list of valid actions for the piece at the lower edge.
+        """
             
-            if piece in ('BC', 'BB', 'BE', 'BD'):
-                return ['BC']
-            
-            # See if it a return pipe
-            if piece in ('VC', 'VB', 'VE', 'VD'):
-                return ['VD', 'VC']
-            
-            if piece in ('LH', 'LV'):
-                return ['LH']
+        # See if it is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            return ['FC', 'FD', 'FE']
+        
+        # See if it is a fork pipe
+        if piece in ('BC', 'BB', 'BE', 'BD'):
+            return ['BC']
+        
+        # See if it a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            return ['VD', 'VC']
+        
+        # See if piece is a straight pipe
+        if piece in ('LH', 'LV'):
+            return ['LH']
             
     def valid_left_edge_actions(piece: str):
         
+        """
+        Determines valid actions for a piece located at the left edge of the grid.
+
+        Args:
+            piece (str): The piece identifier.
+
+        Returns:
+            list: A list of valid actions for the piece at the left edge.
+        """
+
         # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FC', 'FB', 'FD']
         
+        # See if it is a fork pipe
         if piece in ('BC', 'BB', 'BE', 'BD'):
             return ['BD']
         
@@ -254,15 +385,27 @@ class Board:
         if piece in ('VC', 'VB', 'VE', 'VD'):
             return ['VB', 'VD']
         
+        # See if it is a straight pipe
         if piece in ('LH', 'LV'):
             return ['LV']
         
     def valid_right_edge_actions(piece: str):
             
+        """
+        Determines valid actions for a piece located at the right edge of the grid.
+
+        Args:
+            piece (str): The piece identifier.
+
+        Returns:
+            list: A list of valid actions for the piece at the right edge.
+        """
+        
         # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FC', 'FB', 'FE']
         
+        # See if it is a fork pipe
         if piece in ('BC', 'BB', 'BE', 'BD'):
             return ['BE']
         
@@ -270,6 +413,7 @@ class Board:
         if piece in ('VC', 'VB', 'VE', 'VD'):
             return ['VE', 'VC']
         
+        # See if it is a straight pipe
         if piece in ('LH', 'LV'):
             return ['LV']
 
