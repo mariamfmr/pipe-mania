@@ -151,7 +151,6 @@ class Board:
                 self.validatePipe(row, 0)
             if self.grid[row][len(self.grid[0])-1] in ('LH', 'LV'):
                 self.grid[row][len(self.grid[0])-1] = 'LV'
-                print("A validar peça na posição", row, len(self.grid[0])-1)
                 self.validatePipe(row, len(self.grid[0])-1)
         # iterate over corners, look for a "L" pipe and change it to its correct orientation, validating its position
         if self.grid[0][0] in ('VC', 'VB', 'VE', 'VD'):
@@ -383,6 +382,89 @@ class Board:
                 return ['LV']
 
         return []
+    
+    # returns valid rotations of a piece based on its position on the grid
+    def get_valid_rotations_pos(self, piece: str, row: int, col: int) -> list:
+        valid_rotations = []
+        # Check if the piece is a upper left corner
+        if self.board.is_corner_upper_left(row, col):
+            valid_rotations.append(Board.valid_upper_left_corner_actions(piece))
+
+        # Check if the piece is a upper right corner
+        elif self.board.is_corner_upper_right(row, col):
+            valid_rotations.append(Board.valid_upper_right_corner_actions(piece))
+
+        # Check if the piece is a lower left corner
+        elif self.board.is_corner_lower_left(row, col):
+            valid_rotations.append(Board.valid_lower_left_corner_actions(piece))
+
+        # Check if the piece is a lower right corner
+        elif self.board.is_corner_lower_right(row, col):
+            valid_rotations.append(Board.valid_lower_right_corner_actions(piece))
+
+        # Check if the piece is an upper edge
+        elif self.board.is_edge_upper(row, col):
+            valid_rotations.append(Board.valid_upper_edge_actions(piece))
+
+        # Check if the piece is a lower edge
+        elif self.board.is_edge_lower(row, col) and not (self.board.is_corner_lower_left(row, col) or self.board.is_corner_lower_right(row, col)):
+            valid_rotations.append(Board.valid_lower_edge_actions(piece))
+
+        # Check if the piece is a upper edge
+        elif self.board.is_edge_left(row, col) and not (self.board.is_corner_upper_left(row, col) or self.board.is_corner_upper_right(row, col)):
+            valid_rotations.append(Board.valid_left_edge_actions(piece))
+
+        # Check if the piece is a right edge
+        elif self.board.is_edge_right(row, col) and not (self.board.is_corner_upper_right(row, col) or self.board.is_corner_lower_right(row, col)):
+            valid_rotations.append(Board.valid_right_edge_actions(piece))
+
+        # Check if the piece is a left piece
+        elif self.board.is_edge_left(row, col) and not (self.board.is_corner_upper_left(row, col) or self.board.is_corner_lower_left(row, col)):
+            valid_rotations.append(Board.valid_left_edge_actions(piece))
+
+        return valid_rotations
+    
+    # returns valid positions based on neighbors that are already in their final position
+    def get_valid_rotations_neighbors(self, piece: str, row: int, col: int) -> list:
+        valid_rotations = []
+        # See if upper neighbor is in the correct orientation
+        if row > 0:
+            if self.board.is_fixed_piece(row-1, col):  
+                valid_rotations.append(Board.valid_actions_with_upper_neighbor(piece, self.board.get_value(row-1, col)))
+
+        # See if lower neighbor is in the correct orientation
+        if row < len(self.board.grid) - 1:
+            if self.board.is_fixed_piece(row+1, col):
+                valid_rotations.append(Board.valid_actions_with_lower_neighbor(piece, self.board.get_value(row+1, col)))
+        
+        # See if left neighbor is in the correct orientation
+        if col > 0:
+            if self.board.is_fixed_piece(row, col-1):
+                valid_rotations.append(Board.valid_actions_with_left_neighbor(piece, self.board.get_value(row, col-1)))
+
+        # See if right neighbor is in the correct orientation
+        if col < len(self.board.grid[0]) - 1:
+            if self.board.is_fixed_piece(row, col+1):
+                valid_rotations.append(Board.valid_actions_with_right_neighbor(piece, board.get_value(row, col+1)))
+
+        return valid_rotations
+
+    # valid rotations for one position
+    def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
+        """ Returns a list of valid rotations for the given piece. """
+        valid_rotations_pos = []
+        valid_rotations_pos.append(self.get_valid_rotations_pos(piece, row, col)) # get the valid rotations based on the position of the piece
+
+        valid_rotations_neighbors = []
+        valid_rotations_neighbors.append(self.get_valid_rotations_neighbors(piece, row, col))
+
+        # do the intersection of the two lists
+        valid_rotations = []
+        for rot in valid_rotations_pos[0][0]:
+            if rot in valid_rotations_neighbors[0][0]:
+                valid_rotations.append(rot)
+
+        return valid_rotations
 
     @staticmethod
     def parse_instance(input_string: str):
@@ -474,70 +556,6 @@ class PipeMania(Problem):
             return False
         else:
             return True
-
-    # valid rotations for one position
-    def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
-        """ Returns a list of valid rotations for the given piece. """
-        valid_rotations = []
-        
-        # Check if the piece is a upper left corner
-        if self.board.is_corner_upper_left(row, col):
-            valid_rotations.append(Board.valid_upper_left_corner_actions(piece))
-
-        # Check if the piece is a upper right corner
-        elif self.board.is_corner_upper_right(row, col):
-            valid_rotations.append(Board.valid_upper_right_corner_actions(piece))
-
-        # Check if the piece is a lower left corner
-        elif self.board.is_corner_lower_left(row, col):
-            valid_rotations.append(Board.valid_lower_left_corner_actions(piece))
-
-        # Check if the piece is a lower right corner
-        elif self.board.is_corner_lower_right(row, col):
-            valid_rotations.append(Board.valid_lower_right_corner_actions(piece))
-
-        # Check if the piece is an upper edge
-        elif self.board.is_edge_upper(row, col):
-            valid_rotations.append(Board.valid_upper_edge_actions(piece))
-
-        # Check if the piece is a lower edge
-        elif self.board.is_edge_lower(row, col) and not (self.board.is_corner_lower_left(row, col) or self.board.is_corner_lower_right(row, col)):
-            valid_rotations.append(Board.valid_lower_edge_actions(piece))
-
-        # Check if the piece is a upper edge
-        elif self.board.is_edge_left(row, col) and not (self.board.is_corner_upper_left(row, col) or self.board.is_corner_upper_right(row, col)):
-            valid_rotations.append(Board.valid_left_edge_actions(piece))
-
-        # Check if the piece is a right edge
-        elif self.board.is_edge_right(row, col) and not (self.board.is_corner_upper_right(row, col) or self.board.is_corner_lower_right(row, col)):
-            valid_rotations.append(Board.valid_right_edge_actions(piece))
-
-        # Check if the piece is a left piece
-        elif self.board.is_edge_left(row, col) and not (self.board.is_corner_upper_left(row, col) or self.board.is_corner_lower_left(row, col)):
-            valid_rotations.append(Board.valid_left_edge_actions(piece))
-        
-        # See if upper neighbor is in the correct orientation
-        if row > 0:
-            if self.board.is_fixed_piece(row-1, col): # ou seja se ja esta na posicao final?
-                valid_rotations.append(Board.valid_actions_with_upper_neighbor(piece, self.board.get_value(row-1, col)))
-
-        # See if lower neighbor is in the correct orientation
-        if row < len(self.board.grid) - 1:
-            if self.board.is_fixed_piece(row+1, col):
-                valid_rotations.append(Board.valid_actions_with_lower_neighbor(piece, self.board.get_value(row+1, col)))
-        
-        # See if left neighbor is in the correct orientation
-        if col > 0:
-            if self.board.is_fixed_piece(row, col-1):
-                valid_rotations.append(Board.valid_actions_with_left_neighbor(piece, self.board.get_value(row, col-1)))
-
-        # See if right neighbor is in the correct orientation
-        if col < len(self.board.grid[0]) - 1:
-            if self.board.is_fixed_piece(row, col+1):
-                valid_rotations.append(Board.valid_actions_with_right_neighbor(piece, board.get_value(row, col+1)))
-
-
-        return valid_rotations
 
     def actions(self, state: PipeManiaState):
         """ Returns a 3D array of actions that can be executed from the given state. """
@@ -700,26 +718,23 @@ if __name__ == "__main__":
 
     board = Board.parse_instance(input_string)
     board.print()
-    board.validateBorders()
+    board.validateBorders() 
     print("\n")
     board.print()
-    print(board.valid_positions)
-
-    s1 = PipeManiaState(board)
-
     
-
+    s1 = PipeManiaState(board)
+    
     goal = "FB\tVB\tVE\nBD\tBE\tLV\nFC\tFC\tFC\n"
     goal_board = Board.parse_instance(goal)
     s2 = PipeManiaState(goal_board)
     
     
     problem = PipeMania(board, goal_board)
+    print(board.valid_positions)
+    print(board.get_valid_rotations(s1.get_value(0,1), 0, 1))
 
 
-    print(Problem.goal_test(problem, s2))
-
-    root = Node(PipeManiaState(board), None, None, 0)
+    #root = Node(PipeManiaState(board), None, None, 0)
     #expand_tree(root, problem)
 
 
