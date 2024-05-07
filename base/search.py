@@ -190,12 +190,20 @@ def breadth_first_tree_search(problem):
         node = frontier.popleft()
         if problem.goal_test(node.state):
             return node
+        print("Cost:",node.path_cost)
+        node.state.board.print()
+        print("This action lead to this state:",node.action)    
+        print("ACTIONS AVAILABLE:",problem.actions(node.state))
+        print("FIXED POS", node.state.board.valid_positions)
+        print("\n")
+
         frontier.extend(node.expand(problem))
+
     return None
 
 
 def depth_first_tree_search(problem):
-    """
+    """ 
     [Figure 3.7]
     Search the deepest nodes in the search tree first.
     Search through the successors of a problem to find a goal.
@@ -209,6 +217,13 @@ def depth_first_tree_search(problem):
         node = frontier.pop()
         if problem.goal_test(node.state):
             return node
+        
+        print("Cost:",node.path_cost)
+        node.state.board.print()
+        print("This action lead to this state:",node.action) 
+        print("ACTIONS AVAILABLE:",problem.actions(node.state))
+        print("FIXED POS", node.state.board.valid_positions)
+        print("\n")
         frontier.extend(node.expand(problem))
     return None
 

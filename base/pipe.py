@@ -133,7 +133,8 @@ class Board:
 
     def validatePipe(self, row: int, col: int):
         # Validate piece at the given position
-        self.valid_positions.append((row, col))
+        if not self.is_fixed_piece(row, col):
+            self.valid_positions.append((row, col))
 
     def validateBorders(self):
         # iterate upper and bottom row except corner, look for a straight pipe and change it to horizontal, validating its position
@@ -359,9 +360,9 @@ class Board:
     def valid_actions_with_right_neighbor(piece: str, right_neighbor: str):
         if piece in ('FC', 'FB', 'FE', 'FD'):
             if right_neighbor in ('BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
-                return ['FD']
-            elif right_neighbor in ('FC', 'BE', 'VD', 'BC', 'LH'):
-                return ['FB', 'FE', 'FC']
+                return ['FD'] # connected to the left neighbor
+            elif right_neighbor in ('FC', 'BE', 'VD', 'VB', 'BC', 'LH'):
+                return ['FB', 'FE', 'FC'] # not connected to the left neighbor
             
         if piece in ('BC', 'BB', 'BE', 'BD'):
             if right_neighbor in ('FE','BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
@@ -450,7 +451,7 @@ class Board:
         # See if right neighbor is in the correct orientation
         if col < len(self.board.grid[0]) - 1:
             if self.board.is_fixed_piece(row, col+1):
-                valid_rotations.append(Board.valid_actions_with_right_neighbor(piece, board.get_value(row, col+1)))
+                valid_rotations.append(Board.valid_actions_with_right_neighbor(piece, self.board.get_value(row, col+1)))
 
 
         # Intersection of the valid rotations
@@ -468,14 +469,20 @@ class Board:
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
         """ Returns a list of valid rotations for the given piece. """
         valid_rotations_pos = self.get_valid_rotations_pos(piece, row, col) # get the valid rotations based on the position of the piece
+        if row == 1 and col == 1:
+            print("V P: ",valid_rotations_pos)
 
         valid_rotations_neighbors = self.get_valid_rotations_neighbors(piece, row, col) # get the valid rotations based on the neighbors of the piece
+        if row == 1 and col == 1:
+            print("V N: ", valid_rotations_neighbors)
         # do the intersection of the two lists
         valid_rotations = []
-        if valid_rotations_neighbors != None and valid_rotations_pos != None:
+        if len(valid_rotations_neighbors) != 0 and len(valid_rotations_pos) != 0:
             valid_rotations = [(value, row, col) for value in valid_rotations_pos if value in valid_rotations_neighbors]
+        elif len(valid_rotations_pos) == 0 and len(valid_rotations_neighbors) != 0:
+            valid_rotations = [(value, row, col) for value in valid_rotations_neighbors]
 
-
+        
         return valid_rotations
 
     @staticmethod
@@ -577,22 +584,15 @@ class PipeMania(Problem):
         # Iterate over each position on the board
         for row in range(num_rows):
             for col in range(num_cols):
-                piece = state.board.get_value(row, col)
-                actions_at_position = state.board.get_valid_rotations(piece, row, col)
-                available_actions.extend(actions_at_position)
+                if not state.board.is_fixed_piece(row, col):
+                    piece = state.board.get_value(row, col)
+                    actions_at_position = state.board.get_valid_rotations(piece, row, col)
+                    available_actions.extend(actions_at_position)
         return available_actions
 
-    """
+
     def goal_test(self, state: PipeManiaState)-> bool:
-        Retorna True se 'state' é um estado objetivo.
-        # check for each piece if it is connected
-        for row in range(len(state.board.grid)):
-            for col in range(len(state.board.grid[0])):
-                piece = state.board.get_value(row, col)
-                if not Piece(piece).isConnected(state.board, row, col):
-                    return False
-        return True
-    """
+        return False
     
     def result(self, state: PipeManiaState, action): # action = (new_rot, row, col)
         """ Retorna o estado resultante de executar a 'action' sobre
@@ -600,10 +600,11 @@ class PipeMania(Problem):
         das presentes na lista obtida pela execução de
         self.actions(state). """
         # Create a copy of the board to modify
-        new_board = Board([row[:] for row in state.board.grid])
+        new_grid = [row[:] for row in state.board.grid]
+        new_board = Board(new_grid)
+        new_board.valid_positions = state.board.valid_positions.copy()
         new_board.grid[action[1]][action[2]] = action[0]
         new_board.validatePipe(action[1], action[2])
-        print("validada a peça na posição", action[1], action[2])
         
         # Create and return a new state with the modified board
         return PipeManiaState(new_board)
@@ -648,77 +649,8 @@ class Piece():
             return board.is_connected_vertical(row, col, True) and board.is_connected_vertical(row, col, False)
         else:
             return False
-        
-
-def expand_tree(root: Node, problem: PipeMania):
-    frontier = [root]
-
-    while frontier:
-        node = frontier.pop()
-        children = node.expand(problem)  # Get the children of the current node
-
-        # Calculate the number of connected pieces in the current node
-        num_connected_pieces_parent = len(Board.get_connected_pieces(node.state.board))
-
-        better_node = False
-        for child in children:
-            if max((len(Board.get_connected_pieces(child.state.board)), num_connected_pieces_parent)) > num_connected_pieces_parent:
-                better_node = True
-
-        if better_node:
-
-            # Explore all children
-            for child in children:
-                # Calculate the number of connected pieces in the child node
-                num_connected_pieces_child = len(Board.get_connected_pieces(child.state.board))
                 
-                if num_connected_pieces_child > num_connected_pieces_parent:
-                    print("Exploring child with at least the same number of connected pieces.")
-                    print(child.state.board.print())
-                    print("Action:", child.action)
-                    print("Cost:", child.path_cost)
-                    print("num of connected pieces child:", num_connected_pieces_child)
-                    print("num of connected pieces parent:", num_connected_pieces_parent)
-                    print("\n")
-
-                    if problem.goal_test(child.state):
-                        print("Goal state found!")
-                        break
-                    frontier.append(child)
-                else:
-                    print("\n")
         
-        else:
-            # Explore all children
-            for child in children:
-                # Calculate the number of connected pieces in the child node
-                num_connected_pieces_child = len(Board.get_connected_pieces(child.state.board))
-                
-                if num_connected_pieces_child >= num_connected_pieces_parent:
-                    print("Exploring child with at least the same number of connected pieces.")
-                    print(child.state.board.print())
-                    print("Action:", child.action)
-                    print("Cost:", child.path_cost)
-                    print("num of connected pieces child:", num_connected_pieces_child)
-                    print("num of connected pieces parent:", num_connected_pieces_parent)
-                    print("\n")
-
-                    if problem.goal_test(child.state):
-                        print("Goal state found!")
-                        break
-                    frontier.append(child)
-                else:
-                    print("\n")
-
-
-        
-        # Break the loop if a goal state is found
-        if problem.goal_test(node.state):
-            print("Goal state found at the current node!")
-            break
-
-
-
 if __name__ == "__main__":
     # TODO:
     # Ler o ficheiro do standard input,
@@ -743,11 +675,14 @@ if __name__ == "__main__":
     
     problem = PipeMania(board, goal_board)
     print(board.valid_positions)
-    print(problem.actions(s1))
 
-
-    #root = Node(PipeManiaState(board), None, None, 0)
-    #expand_tree(root, problem)
+    root = Node(PipeManiaState(board), None, None, 0)
+    #print(problem.actions(root.state))
+    #expand_tree(problem, root)
+    
+    goal_node = depth_first_tree_search(problem)
+    #goal_node.state.board.print()
+    #goal_node2 = breadth_first_tree_search(problem)
 
 
 
