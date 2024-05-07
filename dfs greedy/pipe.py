@@ -295,9 +295,7 @@ class PipeMania(Problem):
 
         return available_actions
 
-    """
     def goal_test(self, state: PipeManiaState)-> bool:
-        Retorna True se 'state' é um estado objetivo.
         # check for each piece if it is connected
         for row in range(len(state.board.grid)):
             for col in range(len(state.board.grid[0])):
@@ -305,7 +303,6 @@ class PipeMania(Problem):
                 if not Piece(piece).isConnected(state.board, row, col):
                     return False
         return True
-    """
     
     def result(self, state: PipeManiaState, action): # action = (row, col, clockwise)
         """ Retorna o estado resultante de executar a 'action' sobre

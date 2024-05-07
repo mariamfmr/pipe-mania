@@ -217,6 +217,15 @@ class Board:
 
                 # Validate the position of the piece
                 self.validatePipe(0, col)
+
+            # Check if the piece is a fork pipe in the upper row
+            if self.grid[0][col] in ('BC', 'BB', 'BE', 'BD'):
+
+                # Change the piece to correct orientation
+                self.grid[0][col] = 'BB'
+
+                # Validate the position of the piece
+                self.validatePipe(0, col)
             
             # Check if the piece is a straight pipe in the bottom row
             if self.grid[len(self.grid)-1][col] in ('LH', 'LV'):
@@ -226,6 +235,16 @@ class Board:
 
                 # Validate the position of the piece
                 self.validatePipe(len(self.grid)-1, col)
+
+            # Check if the piece is a fork pipe in the bottom row
+            if self.grid[len(self.grid)-1][col] in ('BC', 'BB', 'BE', 'BD'):
+
+                # Change the piece to correct orientation
+                self.grid[len(self.grid)-1][col] = 'BC'
+
+                # Validate the position of the piece
+                self.validatePipe(len(self.grid)-1, col)
+
 
         # Iterate over left and right columns except corners
         for row in range(1, len(self.grid)-1):
@@ -239,6 +258,15 @@ class Board:
                 # Validate the position of the piece
                 self.validatePipe(row, 0)
 
+            # Check if the piece is a fork pipe in the left column
+            if self.grid[row][0] in ('BC', 'BB', 'BE', 'BD'):
+                
+                # Change the piece to correct orientation
+                self.grid[row][0] = 'BD'
+
+                # Validate the position of the piece
+                self.validatePipe(row, 0)
+
             # Check if the piece is a straight pipe in the right column
             if self.grid[row][len(self.grid[0])-1] in ('LH', 'LV'):
 
@@ -247,6 +275,15 @@ class Board:
 
                 # Validate the position of the piece
                 self.validatePipe(row, len(self.grid[0])-1)
+
+            # Check if the piece is a fork pipe in the right column
+            if self.grid[row][len(self.grid[0])-1] in ('BC', 'BB', 'BE', 'BD'):
+                    
+                    # Change the piece to correct orientation
+                    self.grid[row][len(self.grid[0])-1] = 'BE'
+    
+                    # Validate the position of the piece
+                    self.validatePipe(row, len(self.grid[0])-1)
 
         # See if the upper left corner is a return pipe
         if self.grid[0][0] in ('VC', 'VB', 'VE', 'VD'):
@@ -1028,13 +1065,12 @@ if __name__ == "__main__":
     # Imprimir para o standard output no formato indicado.
     # Assuming you have the input string
     input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
+    input2 = "FC\tBB\tBC\tFB\nFC\tBD\tFD\tFD\nVD\tBC\tBD\tBD\nFB\tFB\tVE\tFD\n"
 
-    board = Board.parse_instance(input_string)
+    board = Board.parse_instance(input2)
     board.validateBorders() 
         
     problem = PipeMania(board)
-
     
     goal_node = depth_first_tree_search(problem)
-    goal_node.state.board.print()
     pass
