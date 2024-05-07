@@ -33,8 +33,6 @@ class Board:
 
         self.validNeighborsMissing = []
 
-
-
     def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
         """ Devolve os valores imediatamente acima e abaixo, respectivamente. """
         above = None if row == 0 else self.grid[row - 1][col]
@@ -77,24 +75,7 @@ class Board:
     
     def is_edge_right(self, row: int, col: int) -> bool:
         """ Verifica se a posição é uma aresta direita. """
-        return col == len(self.grid[0]) - 1
-    
-    def is_connected_horizontal(self, row: int, col: int, isLeft: bool) -> bool:
-        """ Verifica se a peça na posição (row, col) está ligada à direita. """
-        horizontal_pairs = [['FD', 'BC'], ['FD', 'BB'], ['FD', 'BE'], ['FD', 'VC'], ['FD', 'VE'], ['FD', 'LH'], 
-                            ['BC','BC'] ,['BC', 'BB'], ['BC', 'BE'], ['BC', 'FE'],['BC', 'VC'], ['BC', 'VE'], ['BC', 'LH'],
-                            ['BB','BB'], ['BB', 'FE'], ['BC', 'BC'], ['BB', 'BE'], ['BB', 'VC'], ['BB', 'VE'], ['BB', 'LH'],
-                            ['BD', 'FE'], ['BD', 'BC'], ['BD', 'BB'] , ['BD', 'VC'], ['BD', 'VE'], ['BD', 'LH'], ['BD', 'BE'],
-                            ['VB', 'FE'], ['VB', 'BC'], ['VB', 'BB'], ['VB', 'BE'], ['VB', 'VC'], ['VB', 'VE'], ['VB', 'LH'],
-                            ['LH', 'FE'], ['LH', 'BC'], ['LH', 'BB'], ['LH', 'BE'], ['LH', 'VC'], ['LH', 'VE'], ['LH', 'LH'],
-                            ['VD', 'FE'], ['VD', 'BC'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'VC'],['VD', 'LH']]
-        horizontal = self.adjacent_horizontal_values(row, col) # left, right
-
-        if isLeft:
-            return ([self.grid[row][col], horizontal[1]] in horizontal_pairs)
-        else:
-            return ([horizontal[0], self.grid[row][col]] in horizontal_pairs)
-                
+        return col == len(self.grid[0]) - 1          
 
     def is_connected_vertical(self, row: int, col: int, isUpper: bool) -> bool:
         """ Verifica se a peça na posição (row, col) está ligada acima. """
@@ -107,17 +88,6 @@ class Board:
         else:
             return ([vertical[1], self.grid[row][col]] in vertical_pairs)
         
-    def get_connected_pieces(self) -> list:
-        """ Retorna uma lista de peças conectadas à peça na posição (row, col). """
-        connected_pieces = []
-        # check for each piece if it is connected
-        for row in range(len(self.grid)):
-            for col in range(len(self.grid[0])):
-                piece = self.get_value(row, col)
-                if Piece(piece).isConnected(self, row, col):
-                    connected_pieces.append([row, col])
-        return connected_pieces
-
     def get_value(self, row: int, col: int) -> str:
         """
         Gets the value (piece identifier) at the given position in the grid.
@@ -969,39 +939,6 @@ class Piece():
     def __init__(self, piece_type: str):
         self.piece_type = piece_type
 
-    def isConnected(self, board: Board, row: int, col: int)->bool:
-        if self.piece_type == 'FC':
-            return board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'FB':
-            return board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'FE':
-            return board.is_connected_horizontal(row, col, False)
-        elif self.piece_type == 'FD':
-            return board.is_connected_horizontal(row, col, True)
-        elif self.piece_type == 'BC':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'BB':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'BE':
-            return board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, False) and board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'BD':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_vertical(row, col, True) and board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'VC':
-            return board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'VB':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'VE':
-            return board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'VD':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'LH':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False)
-        elif self.piece_type == 'LV':
-            return board.is_connected_vertical(row, col, True) and board.is_connected_vertical(row, col, False)
-        else:
-            return False
-                
-        
 if __name__ == "__main__":
     # TODO:
     # Ler o ficheiro do standard input,
