@@ -459,7 +459,7 @@ class Board:
         if size > 0:
             for rot in valid_rotations[0]:
                 for i in range(0, size):
-                    if rot in valid_rotations[i]:
+                    if rot in valid_rotations[i] and rot != piece:
                         intersect_rotations.append(rot)
 
         return intersect_rotations
@@ -743,7 +743,6 @@ if __name__ == "__main__":
     
     problem = PipeMania(board, goal_board)
     print(board.valid_positions)
-    print(board.get_valid_rotations(s1.get_value(0,1), 0, 1))
     print(problem.actions(s1))
 
 
