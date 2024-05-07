@@ -385,7 +385,18 @@ class Board:
         return []
     
     # returns valid rotations of a piece based on its position on the grid
-    def get_valid_rotations_pos(self, piece: str, row: int, col: int) -> list:
+    def get_valid_rotations_pos(self, piece: str, row: int, col: int) -> list:     
+        """
+        Returns valid rotations of a piece based on the limits of the grid.
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece on the grid.
+            col (int): The column index of the piece on the grid.
+
+        Returns:
+            list: A list of valid rotations for the piece at the specified position.
+        """  
         valid_rotations = []
         # Check if the piece is a upper left corner
         if self.board.is_corner_upper_left(row, col):
@@ -432,7 +443,17 @@ class Board:
     
     # returns valid positions based on neighbors that are already in their final position
     def get_valid_rotations_neighbors(self, piece: str, row: int, col: int) -> list:
+        """
+        Returns valid positions based on neighbors that are already in their final position.
 
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece on the grid.
+            col (int): The column index of the piece on the grid.
+
+        Returns:
+            list: A list of valid rotations based on the neighboring pieces.
+        """
         valid_rotations = []
 
         # See if upper neighbor is in the correct orientation 
@@ -477,21 +498,28 @@ class Board:
 
     # valid rotations for one position
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
-        
-        # Get the valid rotations based on the position of the piece (if it is in the border)
+        """
+        Returns valid rotations for a piece considering both its position and neighboring pieces.
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece on the grid.
+            col (int): The column index of the piece on the grid.
+
+        Returns:
+            list: A list of valid rotations for the piece at the specified position.
+        """
+
+        # Get the valid rotations based on the limits of the grid
         valid_rotations_pos = self.get_valid_rotations_pos(piece, row, col) 
-        if row == 1 and col == 1:
-            print("V P: ",valid_rotations_pos)
 
         # Get the valid rotations based on the neighbors of the piece that are already in the correct position
-        valid_rotations_neighbors = self.get_valid_rotations_neighbors(piece, row, col) # get the valid rotations based on the neighbors of the piece
-        if row == 1 and col == 1:
-            print("V N: ", valid_rotations_neighbors)
+        valid_rotations_neighbors = self.get_valid_rotations_neighbors(piece, row, col) 
 
         # do the intersection of the two lists
         valid_rotations = []
 
-        # See if the piece is in the outer border
+        # See if there are limitations on the piece's position (outer border or not)
         if len(valid_rotations_neighbors) != 0 and len(valid_rotations_pos) != 0:
             
             # If so, the valid rotations are the intersection of the two lists
@@ -505,7 +533,6 @@ class Board:
 
         # if there is only one valid rotation, we can conclude that the piece is in the correct position
         if len(valid_rotations) == 1:
-            print("POSICAO UNICA ", row, col)
             
         return valid_rotations
 
