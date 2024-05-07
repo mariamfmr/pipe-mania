@@ -273,118 +273,240 @@ class Board:
         if piece in ('LH', 'LV'):
             return ['LV']
 
-    # knowing the upper neighbor is in the correct orientation, return the valid actions
     def valid_actions_with_upper_neighbor(piece: str, upper_neighbor: str):
 
+        """
+        Returns valid actions for a piece considering the correct orientation of the upper neighbor.
+
+        Args:
+            piece (str): The piece identifier.
+            upper_neighbor (str): The identifier of the upper neighbor.
+
+        Returns:
+            list: A list of valid actions for the piece.
+        """
+
+        # If the piece is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
+
+            # If the upper neighbor is connected to the lower neighbor
             if upper_neighbor in ('BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
                 return ['FC']
+            
+            # If the upper neighbor is not connected to the lower neighbor
             elif upper_neighbor in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
                 return ['FB', 'FE', 'FD']
-            
+        
+        # If piece is a fork pipe
         elif piece in ('BC', 'BB', 'BE', 'BD'):
+
+            # If the upper neighbor is connected to the lower neighbor
             if upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
                 return ['BC', 'BE', 'BD']
+            
+            # If the upper neighbor is not connected to the lower neighbor
             else:
                 return ['BB']
-            
+        
+        # If piece is a return pipe 
         elif piece in ('VC', 'VB', 'VE', 'VD'):
+
+            # If the upper neighbor is connected to the lower neighbor
             if upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
                 return ['VC', 'VD']
+            
+            # If the upper neighbor is not connected to the lower neighbor
             else:
                 return ['VB', 'VE']
             
+        # If piece is a straight pipe
         elif piece in ('LH', 'LV'):
+
+            # If the upper neighbor is connected to the lower neighbor
             if upper_neighbor in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
                 return ['LV']
+            
+            # If the upper neighbor is not connected to the lower neighbor
             else:
                 return ['LH']
             
         return []
     
-    # knowing the lower neighbor is in the correct orientation, return the valid actions
     def valid_actions_with_lower_neighbor(piece: str, lower_neighbor: str):
-        if piece in ('FC', 'FB', 'FE', 'FD'):
-            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
-                return ['FC', 'FE', 'FD'] # not connected to the upper neighbor
-            elif lower_neighbor in ('BC', 'BE', 'BD', 'VC', 'VD', 'LV'):
-                return ['FB'] # connected to the upper neighbor
-            
-        if piece in ('BC', 'BB', 'BE', 'BD'):
-            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
-                return ['BC'] # not connected to the upper neighbor
-            else:
-                return ['BB', 'BE', 'BD'] # connected to the upper neighbor
-            
-        if piece in ('VC', 'VB', 'VE', 'VD'):
-            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
-                return ['VC', 'VD'] # not connected to the upper neighbor
-            else:
-                return ['VB', 'VE'] # connected to the upper neighbor
-            
-        if piece in ('LH', 'LV'):
-            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
-                return ['LH'] # not connected to the upper neighbor
-            else:
-                return ['LV'] # connected to the upper neighbor
 
-    # knowing the left neighbor is in the correct orientation, return the valid actions  
-    def valid_actions_with_left_neighbor(piece: str, left_neighbor: str):
+        """
+        Returns valid actions for a piece considering the correct orientation of the lower neighbor.
+
+        Args:
+            piece (str): The piece identifier.
+            lower_neighbor (str): The identifier of the lower neighbor.
+
+        Returns:
+            list: A list of valid actions for the piece.
+        """
+
+        # If the piece is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
+
+            # If the lower neighbor is not connected to the upper neighbor
+            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
+                return ['FC', 'FE', 'FD'] 
+            
+            # If the lower neighbor is connected to the upper neighbor
+            elif lower_neighbor in ('BC', 'BE', 'BD', 'VC', 'VD', 'LV'):
+                return ['FB'] 
+            
+        # If piece is a fork pipe
+        if piece in ('BC', 'BB', 'BE', 'BD'):
+
+            # If the lower neighbor is not connected to the upper neighbor
+            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
+                return ['BC'] 
+            
+            # If the lower neighbor is connected to the upper neighbor
+            else:
+                return ['BB', 'BE', 'BD'] 
+            
+        # If piece is a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+
+            # If the lower neighbor is not connected to the upper neighbor
+            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
+                return ['VC', 'VD'] 
+            
+            # If the lower neighbor is connected to the upper neighbor
+            else:
+                return ['VB', 'VE'] 
+            
+        # If piece is a straight pipe
+        if piece in ('LH', 'LV'):
+
+            # If the lower neighbor is not connected to the upper neighbor
+            if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
+                return ['LH'] 
+            
+            # If the lower neighbor is connected to the upper neighbor
+            else:
+                return ['LV'] 
+            
+    def valid_actions_with_left_neighbor(piece: str, left_neighbor: str):
+
+        """
+        Returns valid actions for a piece considering the correct orientation of the left neighbor.
+
+        Args:
+            piece (str): The piece identifier.
+            left_neighbor (str): The identifier of the left neighbor.
+
+        Returns:
+            list: A list of valid actions for the piece.
+        """
+        
+        # If the piece is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+
+            # If the left neighbor is connected to the right neighbor
             if left_neighbor in ('BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
                 return ['FE']
+            
+            # If the left neighbor is not connected to the right neighbor
             elif left_neighbor in ('FC', 'FB', 'FE', 'BE', 'VC', 'VE', 'LV'):
                 return ['FB', 'FC', 'FD']
-            
+        
+        # If piece is a fork pipe
         if piece in ('BC', 'BB', 'BE', 'BD'):
+
+            # If the left neighbor is connected to the right neighbor
             if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
                 return ['BC', 'BE', 'BB']
+            
+            # If the left neighbor is not connected to the right neighbor
             else:
                 return ['BD']
-            
+        
+        # If piece is a return pipe
         if piece in ('VC', 'VB', 'VE', 'VD'):
+
+            # If the left neighbor is connected to the right neighbor
             if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
                 return ['VC', 'VE']
+            
+            # If the left neighbor is not connected to the right neighbor
             else:
                 return ['VB', 'VD']
-            
+        
+        # If piece is a straight pipe
         if piece in ('LH', 'LV'):
+
+            # If the left neighbor is connected to the right neighbor
             if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
                 return ['LH']
+            
+            # If the left neighbor is not connected to the right neighbor
             else:
                 return ['LV']
 
         return []
 
-    # knowing the right neighbor is in the correct orientation, return the valid actions
     def valid_actions_with_right_neighbor(piece: str, right_neighbor: str):
+
+        """
+        Returns valid actions for a piece considering the correct orientation of the right neighbor.
+
+        Args:
+            piece (str): The piece identifier.
+            right_neighbor (str): The identifier of the right neighbor.
+
+        Returns:
+            list: A list of valid actions for the piece.
+        """
+
+        # If the piece is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
+
+            # If the right neighbor is  connected to the left neighbor
             if right_neighbor in ('BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
-                return ['FD'] # connected to the left neighbor
-            elif right_neighbor in ('FC', 'BE', 'VD', 'VB', 'BC', 'LH'):
-                return ['FB', 'FE', 'FC'] # not connected to the left neighbor
+                return ['FD']
             
+            # If the right neighbor is not connected to the left neighbor
+            elif right_neighbor in ('FC', 'BE', 'VD', 'VB', 'BC', 'LH'):
+                return ['FB', 'FE', 'FC'] 
+            
+        # If piece is a fork pipe
         if piece in ('BC', 'BB', 'BE', 'BD'):
+
+            # If the right neighbor is connected to the left neighbor
             if right_neighbor in ('FE','BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
                 return ['BC', 'BB', 'BD']
+            
+            # If the right neighbor is not connected to the left neighbor
             else:
                 return ['BE']
-            
+        
+        # If piece is a return pipe
         if piece in ('VC', 'VB', 'VE', 'VD'):
+
+            # If the right neighbor is connected to the left neighbor
             if right_neighbor in ('FE','BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
                 return ['VB', 'VD']
+            
+            # If the right neighbor is not connected to the left neighbor
             else:
                 return ['VC', 'VE']
-            
+        
+        # If piece is a straight pipe
         if piece in ('LH', 'LV'):
+
+            # If the right neighbor is connected to the left neighbor
             if right_neighbor in ('FE','BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
                 return ['LH']
+            
+            # If the right neighbor is not connected to the left neighbor
             else:
                 return ['LV']
 
         return []
     
-    # returns valid rotations of a piece based on its position on the grid
     def get_valid_rotations_pos(self, piece: str, row: int, col: int) -> list:     
         """
         Returns valid rotations of a piece based on the limits of the grid.
