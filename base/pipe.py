@@ -948,24 +948,37 @@ class Board:
             
         return valid_rotations
 
+    """
+    FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n
+    """
+
     @staticmethod
-    def parse_instance(input_string: str):
+    def parse_instance():
         """
         Parses an input string representing the problem instance and returns a Board instance.
-
-        Args:
-            input_string (str): The input string containing the grid layout.
 
         Returns:
             Board: An instance of the Board class representing the parsed grid.
         """
         grid = []
-        lines = input_string.strip().split('\n')
+        input_str = sys.stdin.read().strip()  # Read the entire input instead of just one line
+        print("INPUT", input_str)
+    
+        lines = input_str.split('\n')  # Split by newline characters
+        print("LINES", lines)
         for line in lines:
-            pieces = line.split('\t')
+            print("LINE ", line)
+            pieces = line.split()  # Split by whitespace (spaces)
+            print("PIECES ", pieces)
             grid.append(pieces)
 
         return Board(grid)
+
+
+
+
+
+
 
 class PipeManiaState:
     state_id = 0
@@ -1067,7 +1080,7 @@ if __name__ == "__main__":
     input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
     input2 = "FC\tBB\tBC\tFB\nFC\tBD\tFD\tFD\nVD\tBC\tBD\tBD\nFB\tFB\tVE\tFD\n"
 
-    board = Board.parse_instance(input2)
+    board = Board.parse_instance()
     board.validateBorders() 
         
     problem = PipeMania(board)
