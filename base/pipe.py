@@ -813,10 +813,9 @@ class Board:
         intersect_rotations = []    
         size = len(valid_rotations)
         if size > 0:
-            for rot in valid_rotations[0]:
-                for i in range(0, size):
-                    if rot in valid_rotations[i] and rot != piece:
-                        intersect_rotations.append(rot)
+            intersect_rotations = valid_rotations[0]
+            for i in range(1, size):
+                intersect_rotations = [value for value in intersect_rotations if value in valid_rotations[i]]
 
         return intersect_rotations
 
