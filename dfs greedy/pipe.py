@@ -25,17 +25,6 @@ class Board:
         # Grid for the board
         self.grid = grid
 
-        # Board for the board
-        self.board = self
-
-        # Grid for positions in the correct orientation
-        self.validPositions = []
-
-        # Grid for missing valid neighbours around a piece 
-        self.validNeighborsMissing = [[4] * len(self.grid)] * len(self.grid[0])
-
-
-
     def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
         """ Devolve os valores imediatamente acima e abaixo, respectivamente. """
         above = None if row == 0 else self.grid[row - 1][col]
@@ -374,6 +363,7 @@ class Piece():
             return False
         
 
+
 def expand_tree(root: Node, problem: PipeMania):
     frontier = [root]
 
@@ -384,62 +374,47 @@ def expand_tree(root: Node, problem: PipeMania):
         # Calculate the number of connected pieces in the current node
         num_connected_pieces_parent = len(Board.get_connected_pieces(node.state.board))
 
+        # Flag to determine if there's a better node
         better_node = False
+        
+        # Check if any child node has more connected pieces than the parent
         for child in children:
-            if max((len(Board.get_connected_pieces(child.state.board)), num_connected_pieces_parent)) > num_connected_pieces_parent:
+            num_connected_pieces_child = len(Board.get_connected_pieces(child.state.board))
+            if num_connected_pieces_child > num_connected_pieces_parent:
                 better_node = True
+                break
 
+        # Explore children based on the flag
         if better_node:
-
-            # Explore all children
             for child in children:
-                # Calculate the number of connected pieces in the child node
                 num_connected_pieces_child = len(Board.get_connected_pieces(child.state.board))
-                
                 if num_connected_pieces_child > num_connected_pieces_parent:
-                    print("Exploring child with at least the same number of connected pieces.")
-                    print(child.state.board.print())
-                    print("Action:", child.action)
-                    print("Cost:", child.path_cost)
-                    print("num of connected pieces child:", num_connected_pieces_child)
-                    print("num of connected pieces parent:", num_connected_pieces_parent)
-                    print("\n")
-
-                    if problem.goal_test(child.state):
+                    if Problem.goal_test(problem, child.board):
                         print("Goal state found!")
-                        break
+                        return
+                        
                     frontier.append(child)
                 else:
                     print("\n")
-        
         else:
-            # Explore all children
             for child in children:
-                # Calculate the number of connected pieces in the child node
                 num_connected_pieces_child = len(Board.get_connected_pieces(child.state.board))
-                
                 if num_connected_pieces_child >= num_connected_pieces_parent:
-                    print("Exploring child with at least the same number of connected pieces.")
-                    print(child.state.board.print())
-                    print("Action:", child.action)
-                    print("Cost:", child.path_cost)
-                    print("num of connected pieces child:", num_connected_pieces_child)
-                    print("num of connected pieces parent:", num_connected_pieces_parent)
-                    print("\n")
-
-                    if problem.goal_test(child.state):
+                    child.state.board.print()
+                    problem.goal.print()
+                    print(child.state.board == problem.goal)
+                    if Problem.goal_test(problem, child.state.board):
                         print("Goal state found!")
                         break
                     frontier.append(child)
                 else:
                     print("\n")
 
-
-        
         # Break the loop if a goal state is found
-        if problem.goal_test(node.state):
+        if Problem.goal_test(problem, node.state.board):
             print("Goal state found at the current node!")
             break
+
 
 
 
@@ -450,7 +425,31 @@ if __name__ == "__main__":
     # Retirar a solução a partir do nó resultante,
     # Imprimir para o standard output no formato indicado.
     # Assuming you have the input string
+
     input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
+    board = Board.parse_instance(input_string)   
+    s1 = PipeManiaState(board)
+
+    goal = "FB\tVB\tVE\nBD\tBE\tLV\nFC\tFC\tFC\n"
+    goal_board = Board.parse_instance(goal)
+    s2 = PipeManiaState(goal_board)
+        
+    problem = PipeMania(board, goal_board)
+
+    print(Problem.goal_test(problem, s2.board))
+
+
+
+    root = Node(s1, None, None, 0)
+    expand_tree(root, problem)
+
+    #goal = breadth_first_tree_search(problem)
+
+    #print("Is goal?", Problem.goal_test(problem, s2))
+    #print("Solution:\n", goal_node.solution(), sep="")
+    pass
+
+
 
     """
     # Create a Board object by parsing the input string
@@ -505,31 +504,3 @@ if __name__ == "__main__":
     #print("Is goal?", problem.goal_test(s11))
     #print("Solution:\n", s11.board.print(), sep="")
     """
-
-    input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
-    board = Board.parse_instance(input_string)
-   
-    s1 = PipeManiaState(board)
-
-    
-
-    goal = "FB\tVB\tVE\nBD\tBE\tLV\nFC\tFC\tFC\n"
-    goal_board = Board.parse_instance(goal)
-    s2 = PipeManiaState(goal_board)
-    
-    
-    problem = PipeMania(board, goal_board)
-
-
-    print(Problem.goal_test(problem, s2))
-
-    root = Node(PipeManiaState(board), None, None, 0)
-    expand_tree(root, problem)
-
-
-
-    #goal = breadth_first_tree_search(problem)
-
-    #print("Is goal?", Problem.goal_test(problem, s2))
-    #print("Solution:\n", goal_node.solution(), sep="")
-    pass
