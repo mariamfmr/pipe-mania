@@ -785,11 +785,6 @@ class Board:
             list: A list of valid rotations for the piece at the specified position.
         """
 
-        # Check if the piece is already in the correct position
-        if self.is_fixed_piece(row, col):
-            # If so, return an empty list
-            return []
-
         # Get the valid rotations based on the limits of the grid
         valid_rotations_pos = self.get_valid_rotations_pos(piece, row, col) 
 
@@ -810,13 +805,6 @@ class Board:
 
             # If so, the valid rotations are the list of valid rotations based on the neighbors
             valid_rotations = [(value, row, col) for value in valid_rotations_neighbors]
-
-        # Check if the only valid rotation is itself
-        if valid_rotations == [(piece, row, col)]:
-            # If so, remove it from the list since it is already in the correct position
-            valid_rotations = []
-            # Validate the pipe
-            self.validate_pipe(row, col)
 
         return valid_rotations
 
@@ -885,7 +873,7 @@ class PipeMania(Problem):
                     piece = state.board.get_value(row, col)
                     actions_at_position = state.board.get_valid_rotations(piece, row, col)
 
-                    # If there is only one valid action
+                    # If there is only one valid action, give it priority
                     if len(actions_at_position) == 1:
                         # Validate the pipe
                         state.board.validate_pipe(row, col)

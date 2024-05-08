@@ -190,7 +190,10 @@ def breadth_first_tree_search(problem):
     while frontier:
         node = frontier.popleft()
         if problem.goal_test(node.state):
+            print("Cost:",node.path_cost)
             return node
+        
+        print("Cost:",node.path_cost)
         print("\n")
 
         frontier.extend(node.expand(problem))
