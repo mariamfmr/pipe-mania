@@ -89,6 +89,7 @@ class Node:
         return "<Node {}>".format(self.state)
 
     def __lt__(self, node):
+        # Give priority to the node with the lowest actions available
         return self.state < node.state
 
     def expand(self, problem):
@@ -190,10 +191,6 @@ def breadth_first_tree_search(problem):
         node = frontier.popleft()
         if problem.goal_test(node.state):
             return node
-        print("Cost:",node.path_cost)
-        node.state.board.print()
-        print("This action lead to this state:",node.action)    
-
         print("\n")
 
         frontier.extend(node.expand(problem))
@@ -215,11 +212,9 @@ def depth_first_tree_search(problem):
         node = frontier.pop()
 
         print("Cost:",node.path_cost)
-        node.state.board.print()
-        print("This action lead to this state:",node.action)    
-        print("ACTIONS AVAILABLE:",problem.actions(node.state))
-        print("FIXED POS", node.state.board.valid_positions)
-        print("\n")
+        print("Exploring:",node.state.id)
+        print("Current Board:")
+        print(node.state)
 
         if problem.goal_test(node.state):
             print("Cost:",node.path_cost)

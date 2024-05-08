@@ -177,7 +177,7 @@ class Board:
         """
         return (row, col) in self.valid_positions
 
-    def validatePipe(self, row: int, col: int):
+    def validate_pipe(self, row: int, col: int):
         """
         Validates the pipe at the given position.
 
@@ -191,135 +191,6 @@ class Board:
 
             # If not, add it to the list
             self.valid_positions.append((row, col))
-
-            print("Validated pipes: ", self.valid_positions)
-
-    def validateBorders(self):
-
-        """
-        Validates the pipes at the borders of the grid to ensure correct orientation and position.
-
-        Iterates over the upper and bottom rows, and left and right columns, excluding corners,
-        looking for straight pipes and adjusts them to horizontal or vertical orientation accordingly,
-        while validating their positions.
-
-        Iterates over the corner pipes, adjusting them to the correct orientation and validating their positions.
-        """
-
-        # Iterate over upper and bottom rows except corners
-        for col in range(1, len(self.grid[0])-1):
-
-            # Check if the piece is a straight pipe in the upper row
-            if self.grid[0][col] in ('LH', 'LV'):
-
-                # Change the piece to horizontal
-                self.grid[0][col] = 'LH'
-
-                # Validate the position of the piece
-                self.validatePipe(0, col)
-
-            # Check if the piece is a fork pipe in the upper row
-            if self.grid[0][col] in ('BC', 'BB', 'BE', 'BD'):
-
-                # Change the piece to correct orientation
-                self.grid[0][col] = 'BB'
-
-                # Validate the position of the piece
-                self.validatePipe(0, col)
-            
-            # Check if the piece is a straight pipe in the bottom row
-            if self.grid[len(self.grid)-1][col] in ('LH', 'LV'):
-
-                # Change the piece to horizontal
-                self.grid[len(self.grid)-1][col] = 'LH'
-
-                # Validate the position of the piece
-                self.validatePipe(len(self.grid)-1, col)
-
-            # Check if the piece is a fork pipe in the bottom row
-            if self.grid[len(self.grid)-1][col] in ('BC', 'BB', 'BE', 'BD'):
-
-                # Change the piece to correct orientation
-                self.grid[len(self.grid)-1][col] = 'BC'
-
-                # Validate the position of the piece
-                self.validatePipe(len(self.grid)-1, col)
-
-
-        # Iterate over left and right columns except corners
-        for row in range(1, len(self.grid)-1):
-
-            # Check if the piece is a straight pipe in the left column
-            if self.grid[row][0] in ('LH', 'LV'):
-
-                # Change the piece to vertical
-                self.grid[row][0] = 'LV'
-
-                # Validate the position of the piece
-                self.validatePipe(row, 0)
-
-            # Check if the piece is a fork pipe in the left column
-            if self.grid[row][0] in ('BC', 'BB', 'BE', 'BD'):
-                
-                # Change the piece to correct orientation
-                self.grid[row][0] = 'BD'
-
-                # Validate the position of the piece
-                self.validatePipe(row, 0)
-
-            # Check if the piece is a straight pipe in the right column
-            if self.grid[row][len(self.grid[0])-1] in ('LH', 'LV'):
-
-                # Change the piece to vertical
-                self.grid[row][len(self.grid[0])-1] = 'LV'
-
-                # Validate the position of the piece
-                self.validatePipe(row, len(self.grid[0])-1)
-
-            # Check if the piece is a fork pipe in the right column
-            if self.grid[row][len(self.grid[0])-1] in ('BC', 'BB', 'BE', 'BD'):
-                    
-                    # Change the piece to correct orientation
-                    self.grid[row][len(self.grid[0])-1] = 'BE'
-    
-                    # Validate the position of the piece
-                    self.validatePipe(row, len(self.grid[0])-1)
-
-        # See if the upper left corner is a return pipe
-        if self.grid[0][0] in ('VC', 'VB', 'VE', 'VD'):
-
-            # Change the piece to correct orientation
-            self.grid[0][0] = 'VB'
-
-            # Validate the position of the piece
-            self.validatePipe(0, 0)
-
-        # See if the upper right corner is a return pipe
-        if self.grid[0][len(self.grid[0])-1] in ('VC', 'VB', 'VE', 'VD'):
-
-            # Change the piece to correct orientation
-            self.grid[0][len(self.grid[0])-1] = 'VE'
-
-            # Validate the position of the piece
-            self.validatePipe(0, len(self.grid[0])-1)
-
-        # See if the lower left corner is a return pipe
-        if self.grid[len(self.grid)-1][0] in ('VC', 'VB', 'VE', 'VD'):
-
-            # Change the piece to correct orientation
-            self.grid[len(self.grid)-1][0] = 'VD'
-
-            # Validate the position of the piece
-            self.validatePipe(len(self.grid)-1, 0)
-
-        # See if the lower right corner is a return pipe
-        if self.grid[len(self.grid)-1][len(self.grid[0])-1] in ('VC', 'VB', 'VE', 'VD'):
-
-            # Change the piece to correct orientation
-            self.grid[len(self.grid)-1][len(self.grid[0])-1] = 'VC'
-
-            # Validate the position of the piece
-            self.validatePipe(len(self.grid)-1, len(self.grid[0])-1)
 
     def valid_upper_left_corner_actions(piece: str):
 
@@ -533,6 +404,7 @@ class Board:
             if upper_neighbor in ('BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
                 return ['FC']
             
+            
             # If the upper neighbor is not connected to the lower neighbor
             elif upper_neighbor in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
                 return ['FB', 'FE', 'FD']
@@ -590,7 +462,7 @@ class Board:
 
             # If the lower neighbor is not connected to the upper neighbor
             if lower_neighbor in ('FB', 'FE', 'FD', 'BB', 'VB', 'VE', 'LH'):
-                return ['FC', 'FE', 'FD'] 
+                return ['FC', 'FE', 'FD']        
             
             # If the lower neighbor is connected to the upper neighbor
             elif lower_neighbor in ('BC', 'BE', 'BD', 'VC', 'VD', 'LV'):
@@ -646,8 +518,8 @@ class Board:
         if piece in ('FC', 'FB', 'FE', 'FD'):
 
             # If the left neighbor is connected to the right neighbor
-            if left_neighbor in ('BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
-                return ['FE']
+            if left_neighbor in ('BB', 'BC', 'BD', 'VD', 'VB', 'LH'):
+                return ['FE'] 
             
             # If the left neighbor is not connected to the right neighbor
             elif left_neighbor in ('FC', 'FB', 'FE', 'BE', 'VC', 'VE', 'LV'):
@@ -657,7 +529,7 @@ class Board:
         if piece in ('BC', 'BB', 'BE', 'BD'):
 
             # If the left neighbor is connected to the right neighbor
-            if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
+            if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD', 'VB', 'LH'):
                 return ['BC', 'BE', 'BB']
             
             # If the left neighbor is not connected to the right neighbor
@@ -668,7 +540,7 @@ class Board:
         if piece in ('VC', 'VB', 'VE', 'VD'):
 
             # If the left neighbor is connected to the right neighbor
-            if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
+            if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD', 'VB', 'LH'):
                 return ['VC', 'VE']
             
             # If the left neighbor is not connected to the right neighbor
@@ -679,7 +551,7 @@ class Board:
         if piece in ('LH', 'LV'):
 
             # If the left neighbor is connected to the right neighbor
-            if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD' 'VB', 'LH'):
+            if left_neighbor in ('FD', 'BB', 'BC', 'BD', 'VD', 'VB', 'LH'):
                 return ['LH']
             
             # If the left neighbor is not connected to the right neighbor
@@ -709,7 +581,7 @@ class Board:
                 return ['FD']
             
             # If the right neighbor is not connected to the left neighbor
-            elif right_neighbor in ('FC', 'BE', 'VD', 'VB', 'BC', 'LH'):
+            elif right_neighbor in ('FC', 'FD', 'FB', 'BD', 'VD', 'VB', 'LV'):
                 return ['FB', 'FE', 'FC'] 
             
         # If piece is a fork pipe
@@ -747,6 +619,24 @@ class Board:
 
         return []
     
+    def get_all_rotations(self,piece: str):
+
+        # If the piece is a locking pipe
+        if piece in ('FC', 'FB', 'FE', 'FD'):
+            return ['FC', 'FB', 'FE', 'FD']
+        
+        # If the piece is a fork pipe
+        if piece in ('BC', 'BB', 'BE', 'BD'):
+            return ['BC', 'BB', 'BE', 'BD']
+        
+        # If the piece is a return pipe
+        if piece in ('VC', 'VB', 'VE', 'VD'):
+            return ['VC', 'VB', 'VE', 'VD']
+        
+        # If the piece is a straight pipe
+        if piece in ('LH', 'LV'):
+            return ['LH', 'LV']
+
     def get_valid_rotations_pos(self, piece: str, row: int, col: int) -> list:     
         """
         Returns valid rotations of a piece based on the limits of the grid.
@@ -815,7 +705,6 @@ class Board:
         Returns:
             list: A list of valid rotations based on the neighboring pieces.
         """
-        valid_rotations = []
         upper = []
         lower = []
         left = []
@@ -861,10 +750,16 @@ class Board:
                 if len(right) > 0:
                     exists[3] = True
 
+
+        # Check if no neighbors are in the correct orientation
+        if exists == [False, False, False, False]:
+            return board.get_all_rotations(piece)
+        
+        
         # check which have valid rotations
         for i in range(4):
             if exists[i]:
-                existing_neighbors.append(rotations[i]) # example existing_neighbors = [upper, left, right]
+                existing_neighbors.append(rotations[i])
 
         # do the intersection of the lists
         intersect_rotations = []
@@ -873,9 +768,11 @@ class Board:
             for i in range(1, len(existing_neighbors)):
                 intersect_rotations = [value for value in intersect_rotations if value in existing_neighbors[i]]
 
+
         return intersect_rotations
 
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
+
         """
         Returns valid rotations for a piece considering both its position and neighboring pieces.
 
@@ -899,7 +796,7 @@ class Board:
 
         # See if there are limitations on the piece's position (outer border or not)
         if len(valid_rotations_neighbors) != 0 and len(valid_rotations_pos) != 0:
-            
+
             # If so, the valid rotations are the intersection of the two lists
             valid_rotations = [(value, row, col) for value in valid_rotations_pos if value in valid_rotations_neighbors]
 
@@ -909,48 +806,8 @@ class Board:
             # If so, the valid rotations are the list of valid rotations based on the neighbors
             valid_rotations = [(value, row, col) for value in valid_rotations_neighbors]
 
-
         return valid_rotations
 
-    def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
-        """
-        Returns valid rotations for a piece considering both its position and neighboring pieces.
-
-        Args:
-            piece (str): The piece identifier.
-            row (int): The row index of the piece on the grid.
-            col (int): The column index of the piece on the grid.
-
-        Returns:
-            list: A list of valid rotations for the piece at the specified position.
-        """
-
-        # Get the valid rotations based on the limits of the grid
-        valid_rotations_pos = self.get_valid_rotations_pos(piece, row, col) 
-
-        # Get the valid rotations based on the neighbors of the piece that are already in the correct position
-        valid_rotations_neighbors = self.get_valid_rotations_neighbors(piece, row, col) 
-
-        # do the intersection of the two lists
-        valid_rotations = []
-
-        # See if there are limitations on the piece's position (outer border or not)
-        if len(valid_rotations_neighbors) != 0 and len(valid_rotations_pos) != 0:
-            
-            # If so, the valid rotations are the intersection of the two lists
-            valid_rotations = [(value, row, col) for value in valid_rotations_pos if value in valid_rotations_neighbors]
-
-        # If the piece is not in the outer border
-        elif len(valid_rotations_pos) == 0 and len(valid_rotations_neighbors) != 0:
-
-            # If so, the valid rotations are the list of valid rotations based on the neighbors
-            valid_rotations = [(value, row, col) for value in valid_rotations_neighbors]    
-            
-        return valid_rotations
-
-    """
-    FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n
-    """
 
     @staticmethod
     def parse_instance():
@@ -962,22 +819,13 @@ class Board:
         """
         grid = []
         input_str = sys.stdin.read().strip()  # Read the entire input instead of just one line
-        print("INPUT", input_str)
     
         lines = input_str.split('\n')  # Split by newline characters
-        print("LINES", lines)
         for line in lines:
-            print("LINE ", line)
             pieces = line.split()  # Split by whitespace (spaces)
-            print("PIECES ", pieces)
             grid.append(pieces)
 
         return Board(grid)
-
-
-
-
-
 
 
 class PipeManiaState:
@@ -988,6 +836,7 @@ class PipeManiaState:
         self.id = PipeManiaState.state_id
         PipeManiaState.state_id += 1
 
+
     def __lt__(self, other):
         """ Este método é utilizado em caso de empate na gestão da lista
         de abertos nas procuras informadas. """
@@ -996,7 +845,6 @@ class PipeManiaState:
     def get_value(self, row: int, col: int) -> str:
         """ Devolve o valor na posição (row, col). """
         return self.board.grid[row][col]
-
 
 class PipeMania(Problem):
 
@@ -1017,13 +865,27 @@ class PipeMania(Problem):
         num_rows, num_cols = len(state.board.grid), len(state.board.grid[0])
         available_actions = []
 
+
         # Iterate over each position on the board
         for row in range(num_rows):
             for col in range(num_cols):
                 if not state.board.is_fixed_piece(row, col):
                     piece = state.board.get_value(row, col)
                     actions_at_position = state.board.get_valid_rotations(piece, row, col)
-                    available_actions.extend(actions_at_position)
+
+                    # If there is only one valid action, give it priority
+                    if len(actions_at_position) == 1:
+                        # Validate the pipe
+                        state.board.validate_pipe(row, col)
+                        return actions_at_position
+                    
+                    else:
+                        available_actions.extend(actions_at_position)
+
+        # If no unique action is found, return all available actions
+        print("Available actions: ", available_actions)
+        print("Valid positions: ", state.board.valid_positions)
+        
 
         return available_actions
         
@@ -1041,23 +903,36 @@ class PipeMania(Problem):
         # See if all pieces of the board are in the correct position
         if len(state.board.valid_positions) > 0:
             if len(state.board.valid_positions) == len(state.board.grid) * len(state.board.grid[0]):
-                print("Goal reached")
+                #print("Goal reached")
                 return True
             else:
                 return False
     
-    def result(self, state: PipeManiaState, action): # action = (new_rot, row, col)
-        """ Retorna o estado resultante de executar a 'action' sobre
-        'state' passado como argumento. A ação a executar deve ser uma
-        das presentes na lista obtida pela execução de
-        self.actions(state). """
+    def result(self, state: PipeManiaState, action):
+
+        """
+        Returns the resulting state after executing the given action on the given state.
+
+        Args:
+            state (PipeManiaState): The current state of the Pipe Mania puzzle.
+            action (tuple): The action to be executed, consisting of new rotation, row, and column.
+
+        Returns:
+            PipeManiaState: The resulting state after executing the action.
+        """
+
         # Create a copy of the board to modify
         new_grid = [row[:] for row in state.board.grid]
         new_board = Board(new_grid)
-        new_board.valid_positions = state.board.valid_positions.copy()
+
+        # Copy the valid positions from the current state
+        new_board.valid_positions = state.board.valid_positions
+
         new_board.grid[action[1]][action[2]] = action[0]
-        new_board.validatePipe(action[1], action[2])
-        
+
+        print("Action: ", action)
+        print("New board: ")
+        new_board.print()
         # Create and return a new state with the modified board
         return PipeManiaState(new_board)
         
@@ -1071,19 +946,9 @@ class Piece():
         self.piece_type = piece_type
 
 if __name__ == "__main__":
-    # TODO:
-    # Ler o ficheiro do standard input,
-    # Usar uma técnica de procura para resolver a instância,
-    # Retirar a solução a partir do nó resultante,
-    # Imprimir para o standard output no formato indicado.
-    # Assuming you have the input string
-    input_string = "FB\tVC\tVD\nBC\tBB\tLV\nFB\tFB\tFE\n"
-    input2 = "FC\tBB\tBC\tFB\nFC\tBD\tFD\tFD\nVD\tBC\tBD\tBD\nFB\tFB\tVE\tFD\n"
-
     board = Board.parse_instance()
-    board.validateBorders() 
-        
     problem = PipeMania(board)
-    
-    goal_node = depth_first_tree_search(problem)
+    goal_node = breadth_first_tree_search(problem)
+    print("Goal reached")
+    goal_node.state.board.print()
     pass
