@@ -1060,28 +1060,30 @@ class PipeMania(Problem):
                     piece = state.board.get_value(row, col)
                     actions_at_position = state.board.get_valid_rotations(piece, row, col)
 
-                    # If there is only one valid action
-                    if len(actions_at_position) == 1:
-                        # Validate the pipe
-                        state.board.validate_pipe(row, col)
-                        print("Validating pipe at position: ", row, col, " ")
-                        return actions_at_position
-                    
-                    else:
-                        # Remove its own position from the list of valid positions
-                        filtered_actions_at_position = [action for action in actions_at_position if action[0] != piece]
-
-                        # Convert the numpy arrays to lists
-                        available_actions = [list(action) for action in available_actions]
-
-                        # Convert the numpy arrays to lists
-                        available_actions = [list(action) for action in available_actions]
-
-                        # Randomly shuffle the list of valid actions with numpy
-                        np.random.shuffle(filtered_actions_at_position)
+                    # Check if position was not explored
+                    if (row, col) not in state.board.explored:
+                        # If not explored, check if there is a unique valid action
+                        if len(actions_at_position) == 1:
+                            # Validate the pipe
+                            state.board.validate_pipe(row, col)
+                            print("Validating pipe at position: ", row, col, " ")
+                            return actions_at_position
                         
-                        # Now, available_actions is a list of lists, and there is no dtype information
-                        available_actions.extend(filtered_actions_at_position)
+                        else:
+                            # Remove its own position from the list of valid positions
+                            filtered_actions_at_position = [action for action in actions_at_position if action[0] != piece]
+
+                            # Convert the numpy arrays to lists
+                            available_actions = [list(action) for action in available_actions]
+
+                            # Convert the numpy arrays to lists
+                            available_actions = [list(action) for action in available_actions]
+
+                            # Randomly shuffle the list of valid actions with numpy
+                            np.random.shuffle(filtered_actions_at_position)
+                            
+                            # Now, available_actions is a list of lists, and there is no dtype information
+                            available_actions.extend(filtered_actions_at_position)
 
         # If no unique action is found, return all available actions
         print("Available actions: ", available_actions)
@@ -1146,11 +1148,17 @@ class PipeMania(Problem):
         # Copy the valid positions from the current state
         new_board.valid_positions = state.board.valid_positions.copy()
 
+        # Copy the explored positions from the current state
+        new_board.explored = state.board.explored.copy()
+
         # Update the board with the action
         new_board.grid[action[1]][action[2]] = action[0]
 
         # Update heuristics
         new_board.heuristic = action[3]
+
+        # Add the actions' position to the explored list
+        new_board.explored.append((action[1], action[2]))
 
 
         # Create and return a new state with the modified board
