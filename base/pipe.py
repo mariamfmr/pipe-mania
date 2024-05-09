@@ -69,34 +69,154 @@ class Board:
             bool: True if the position is the upper right corner, False otherwise.
         """
         return row == 0 and col == len(self.grid[0]) - 1
-    
-    def is_connected_horizontal(self, row: int, col: int, isLeft: bool) -> bool:
-        """ Verifica se a peça na posição (row, col) está ligada à direita. """
-        horizontal_pairs = [['FD', 'BC'], ['FD', 'BB'], ['FD', 'BE'], ['FD', 'VC'], ['FD', 'VE'], ['FD', 'LH'], 
-                            ['BC','BC'] ,['BC', 'BB'], ['BC', 'BE'], ['BC', 'FE'],['BC', 'VC'], ['BC', 'VE'], ['BC', 'LH'],
-                            ['BB','BB'], ['BB', 'FE'], ['BC', 'BC'], ['BB', 'BE'], ['BB', 'VC'], ['BB', 'VE'], ['BB', 'LH'],
-                            ['BD', 'FE'], ['BD', 'BC'], ['BD', 'BB'] , ['BD', 'VC'], ['BD', 'VE'], ['BD', 'LH'], ['BD', 'BE'],
-                            ['VB', 'FE'], ['VB', 'BC'], ['VB', 'BB'], ['VB', 'BE'], ['VB', 'VC'], ['VB', 'VE'], ['VB', 'LH'],
-                            ['LH', 'FE'], ['LH', 'BC'], ['LH', 'BB'], ['LH', 'BE'], ['LH', 'VC'], ['LH', 'VE'], ['LH', 'LH'],
-                            ['VD', 'FE'], ['VD', 'BC'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'VC'],['VD', 'LH']]
-        horizontal = self.adjacent_horizontal_values(row, col) # left, right
 
-        if isLeft:
-            return ([self.grid[row][col], horizontal[1]] in horizontal_pairs)
-        else:
-            return ([horizontal[0], self.grid[row][col]] in horizontal_pairs)
+    def is_connected_left(self, row: int, col: int) -> bool:
+            # Sees if a piece is connected to the left
+            # If piece has a left neighbor
+            piece = self.grid[row][col]
+            if col > 0:
+                # If the left neighbor is connected to the right neighbor
+                left_piece = self.grid[row][col - 1]
+                if piece in ('FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
+                    if left_piece in ('FD', 'BC', 'BB', 'BD', 'VD', 'VB', 'LH'):
+                        return True
+                else:
+                    if left_piece in ('FC', 'FB', 'FD', 'BE', 'VC', 'VE', 'LV'):
+                        return True
+                return False  
+            
+            # Then it is a border piece
+            # See if it is a corner piece
+            if self.is_corner_upper_left(row, col):
+                if piece in ('FB', 'FD', 'VB'):
+                    return True
+                else :
+                    return False
                 
-    def is_connected_vertical(self, row: int, col: int, isUpper: bool) -> bool:
-        """ Verifica se a peça na posição (row, col) está ligada acima. """
-        vertical_pairs = [['FC', 'BB'], ['FC', 'BE'], ['FC', 'BD'], ['FC', 'VB'], ['FC', 'VE'], ['FC', 'LV'],
-                          ['BC', 'FB'], ['BC', 'BB'], ['BC', 'BE'], ['BC', 'BD'], ['BC', 'VB'], ['BC', 'VE'], ['BC', 'LV'], 
-                          ['BE', 'BD'], ['BE', 'VB'], ['BE', 'VE'], ['BE', 'LV'], ['BD', 'FB'], ['BD', 'VB'], ['BD', 'VE'], ['BD', 'LV'], ['VC', 'FB'], ['VC', 'BB'], ['VC', 'BD'], ['VC', 'VB'], ['VC', 'VE'], ['VC', 'LV'], ['VD', 'FB'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'BD'], ['VD', 'VB'], ['VD', 'VE'], ['VD', 'LV'], ['LV', 'FB'], ['LV', 'BB'], ['LV', 'BE'], ['LV', 'BD'], ['LV', 'VB'], ['LV', 'VE'], ['LV', 'LV']]
-        vertical = self.adjacent_vertical_values(row, col) # above, below
-        if not isUpper:
-            return ([self.grid[row][col], vertical[0] ] in vertical_pairs) 
-        else:
-            return ([vertical[1], self.grid[row][col]] in vertical_pairs)
+            # See if it is a border piece
+            if self.is_edge_left(row, col):
+                if piece in ('FC', 'FB', 'FD', 'BD', 'VB', 'VD', 'LV'):
+                    return True
+                else:
+                    return False
+            
+            if self.is_corner_lower_left(row, col):
+                if piece in ('FC', 'FD', 'VD'):
+                    return True 
+                else:       
+                    return False
+
     
+    def is_connected_right(self, row: int, col: int) -> bool:
+        # Sees if a piece is connected to the right
+        # If piece has a right neighbor
+        piece = self.grid[row][col]
+        if col < len(self.grid[0]) - 1:
+            # If the right neighbor is connected to the left neighbor
+            right_piece = self.grid[row][col + 1]
+            if piece in ('FD', 'BC', 'BB', 'BD', 'VD', 'VB', 'LH'):
+                if right_piece in ('FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
+                    return True
+            else:
+                if right_piece in ('FC', 'FB', 'FD', 'BD', 'VB', 'VD', 'LV'):
+                    return True
+            return False
+        
+        # If it is a border piece
+        # See if it is a corner piece
+        if self.is_corner_upper_right(row, col):
+            if piece in ('FE', 'FB', 'VE'):
+                return True
+            else:
+                return False
+        
+        # See if it is a border piece
+        if self.is_edge_right(row, col):
+            if piece in ('FC', 'FE', 'FB', 'BE', 'VC', 'VE', 'LV'):
+                return True
+            else:
+                return False
+            
+        if self.is_corner_lower_right(row, col):
+            if piece in ('FC', 'FE', 'VC'):
+                return True
+            else:
+                return False
+
+    def is_connected_upper(self, row: int, col: int) -> bool:
+        # Sees if a piece is connected to the upper
+        # If piece has a upper neighbor
+        piece = self.grid[row][col]
+        if row > 0:
+            # If the upper neighbor is connected to the lower neighbor
+            upper_piece = self.grid[row - 1][col]
+            if piece in ('FC', 'BC', 'BE', 'BD', 'VC', 'VD', 'LV'):
+                if upper_piece in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
+                    return True
+            else:
+                if upper_piece in ('FC', 'FD', 'FE', 'BC', 'VC', 'VD', 'LH'):
+                    return True
+            return False
+        
+        # If it is a border piece
+        # See if it is a corner piece
+        if self.is_corner_upper_left(row, col):
+            if piece in ('FB', 'FD', 'VB'):
+                return True
+            else :
+                return False
+            
+        if self.is_corner_upper_right(row, col):
+            if piece in ('FE', 'FB', 'VE'):
+                return True
+            else:
+                return False
+            
+        # See if it is a border piece
+        if self.is_edge_upper(row, col):
+            if piece in ('FD', 'FB', 'FE', 'BB', 'VB', 'VE', 'LH'):
+                return True
+            else:
+                return False
+                
+    def is_connected_lower(self, row: int, col: int) -> bool:
+        # Sees if a piece is connected to the lower
+        # If piece has a lower neighbor
+        piece = self.grid[row][col]
+        if row < len(self.grid) - 1:
+            # If the lower neighbor is connected to the upper neighbor
+            lower_piece = self.grid[row + 1][col]
+            if piece in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
+                if lower_piece in ('FC', 'BC', 'BE', 'BD', 'VC', 'VD', 'LV'):
+                    return True
+            else:
+                if lower_piece in ('FB', 'FD', 'FE', 'BB', 'VB', 'VE', 'LH'):
+                    return True
+            return False
+
+        # If it is a border piece
+        # See if it is a corner piece
+        if self.is_corner_lower_right(row, col):
+            if piece in ('FC', 'FE', 'VC'):
+                return True
+            else:
+                return False
+            
+        if self.is_corner_lower_left(row, col):
+                if piece in ('FC', 'FD', 'VD'):
+                    return True 
+                else:       
+                    return False
+                
+        # See if it is a border piece
+        if self.is_edge_lower(row, col):
+            if piece in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH'):
+                return True
+            else:
+                return False
+    
+
+
     def is_corner_upper_left(self, row: int, col: int) -> bool:
         """
         Checks if the position is the upper left corner of the grid.
@@ -136,6 +256,7 @@ class Board:
         """
         return row == len(self.grid) - 1 and col == 0
     
+
     def is_edge_upper(self, row: int, col: int) -> bool:
         """
         Checks if the position is on the upper edge of the grid.
@@ -1027,6 +1148,8 @@ class PipeMania(Problem):
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
         # TODO
+        # The heuristic: number of valid actions of the actions of the state
+        return len(self.actions(node.state))
         pass
 
 class Piece():
@@ -1034,34 +1157,8 @@ class Piece():
         self.piece_type = piece_type
 
     def isConnected(self, board: Board, row: int, col: int)->bool:
-        if self.piece_type == 'FC':
-            return board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'FB':
-            return board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'FE':
-            return board.is_connected_horizontal(row, col, False)
-        elif self.piece_type == 'FD':
-            return board.is_connected_horizontal(row, col, True)
-        elif self.piece_type == 'BC':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'BB':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'BE':
-            return board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, False) and board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'BD':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_vertical(row, col, True) and board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'VC':
-            return board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'VB':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'VE':
-            return board.is_connected_horizontal(row, col, False) and board.is_connected_vertical(row, col, True)
-        elif self.piece_type == 'VD':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_vertical(row, col, False)
-        elif self.piece_type == 'LH':
-            return board.is_connected_horizontal(row, col, True) and board.is_connected_horizontal(row, col, False)
-        elif self.piece_type == 'LV':
-            return board.is_connected_vertical(row, col, True) and board.is_connected_vertical(row, col, False)
+        if board.is_connected_left(row, col) and board.is_connected_right(row, col) and board.is_connected_upper(row, col) and board.is_connected_lower(row, col):
+            return True
         else:
             return False
         
@@ -1070,6 +1167,6 @@ class Piece():
 if __name__ == "__main__":
     board = Board.parse_instance()
     problem = PipeMania(board)
-    goal_node = breadth_first_tree_search(problem)
+    goal_node = astar_search(problem)
     goal_node.state.board.print()
     pass
