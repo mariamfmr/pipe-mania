@@ -44,6 +44,12 @@ class Board:
 
         self.validNeighborsMissing = []
 
+        # int to keep up with its heuristic value
+        self.heuristic = 0
+
+        # Grid for explored positions
+        self.explored = []
+
 
     def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
         """ Devolve os valores imediatamente acima e abaixo, respectivamente. """
@@ -333,6 +339,8 @@ class Board:
             for j, piece in enumerate(row):
                 if (i, j) in self.valid_positions:
                     print(Fore.GREEN + piece, end='\t')
+                elif (i, j) in self.explored:
+                    print(Fore.YELLOW + piece, end='\t')
                 else:
                     print(piece, end='\t')
             print()  # print a newline at the end of each row
@@ -976,14 +984,15 @@ class Board:
         if len(valid_rotations_neighbors) != 0 and len(valid_rotations_pos) != 0:
 
             # If so, the valid rotations are the intersection of the two lists
-            valid_rotations = [(value, row, col) for value in valid_rotations_pos if value in valid_rotations_neighbors]
+            valid_rotations = [(value, row, col, len(valid_rotations_neighbors)+len(valid_rotations_pos)) for value in valid_rotations_pos if value in valid_rotations_neighbors]
 
         # If the piece is not in the outer border
         elif len(valid_rotations_pos) == 0 and len(valid_rotations_neighbors) != 0:
 
             # If so, the valid rotations are the list of valid rotations based on the neighbors
-            valid_rotations = [(value, row, col) for value in valid_rotations_neighbors]
-    
+            valid_rotations = [(value, row, col, len(valid_rotations_neighbors)) for value in valid_rotations_neighbors]
+        
+
         return valid_rotations
 
 
@@ -1072,7 +1081,6 @@ class PipeMania(Problem):
                         np.random.shuffle(filtered_actions_at_position)
                         
                         # Now, available_actions is a list of lists, and there is no dtype information
-
                         available_actions.extend(filtered_actions_at_position)
 
         # If no unique action is found, return all available actions
@@ -1141,6 +1149,9 @@ class PipeMania(Problem):
         # Update the board with the action
         new_board.grid[action[1]][action[2]] = action[0]
 
+        # Update heuristics
+        new_board.heuristic = action[3]
+
 
         # Create and return a new state with the modified board
         return PipeManiaState(new_board)
@@ -1149,7 +1160,7 @@ class PipeMania(Problem):
         """ Função heuristica utilizada para a procura A*. """
         # TODO
         # The heuristic: number of valid actions of the actions of the state
-        return len(self.actions(node.state))
+        return board.heuristic
         pass
 
 class Piece():
