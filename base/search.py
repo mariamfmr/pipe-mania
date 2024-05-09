@@ -194,6 +194,8 @@ def breadth_first_tree_search(problem):
             return node
         
         print("Cost:",node.path_cost)
+        print("Current Board:")
+        node.state.board.print()
         print("\n")
 
         frontier.extend(node.expand(problem))
@@ -213,11 +215,6 @@ def depth_first_tree_search(problem):
 
     while frontier:
         node = frontier.pop()
-
-        print("Cost:",node.path_cost)
-        print("Exploring:",node.state.id)
-        print("Current Board:")
-        print(node.state)
 
         if problem.goal_test(node.state):
             print("Cost:",node.path_cost)

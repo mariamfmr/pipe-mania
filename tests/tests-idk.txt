@@ -1,0 +1,3 @@
+VE	    FC	    VE	    FC
+VB	    VE	    VE	    VE
+VC	    VE	    VB	    FC
