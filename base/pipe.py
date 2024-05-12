@@ -1058,7 +1058,8 @@ class PipeMania(Problem):
 
 
         if state.board.invalid:
-            return [(0,0,0)]
+            print("Invalid State")
+            return []
         
         # Iterate over the rows and columns of the grid and immediately return the first unique valid action found
         if(state.board.unique_to_be_explored):
@@ -1078,6 +1079,7 @@ class PipeMania(Problem):
                 return [available_actions]
         
         state.board.unique_to_be_explored = False
+
         # All unique actions are done, search for reast of the actions
         for s in range(num_rows + num_cols - 1):
             for row in range(max(0, s - num_cols + 1), min(s + 1, num_rows)):
@@ -1122,9 +1124,6 @@ class PipeMania(Problem):
                         # Put the new piece position in the explored grid
                         state.board.explored_grid[row][col] = valid_rotations[0][0]
                         unique_actions.append(valid_rotations[0])
-                        
-        #"Available actions: ", available_actions)
-        #state.board.print()
            
         if available_actions == []:
             return [unique_actions]
@@ -1205,9 +1204,7 @@ class PipeMania(Problem):
 
         # Copy explored positions
         new_board.explored_grid = [row[:] for row in state.board.explored_grid]  
-        # Update the board with the action
-        # See if its only one, in the form (rotation, row, col)
-        # See if it is the form (String, int, int)
+
         if len(action) == 3 and isinstance(action[0], str):
             new_board.grid[action[1]][action[2]] = action[0]
             new_board.explored.append((action[1], action[2]))
@@ -1221,11 +1218,7 @@ class PipeMania(Problem):
 
                 # Add them to the explored grid
                 new_board.explored_grid[rotation[1]][rotation[2]] = rotation[0]
-
-        #print("New board: ")
-       # new_board.print()
-
-        # Create and return a new state with the modified board
+        
         return PipeManiaState(new_board)
 
     def h(self, node: Node):
@@ -1255,7 +1248,5 @@ if __name__ == "__main__":
     board = Board.parse_instance()
     problem = PipeMania(board)
     goal_node = breadth_first_tree_search(problem)
-    #print("\n")
-    #print("Goal Reached: ")
     goal_node.state.board.print()
     pass
