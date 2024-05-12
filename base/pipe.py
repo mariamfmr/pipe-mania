@@ -48,6 +48,31 @@ class Board:
         # Grid for the explored board with the same dimensions as the original grid
         self.explored_grid = [[' ' for _ in range(len(grid[0]))] for _ in range(len(grid))]
 
+    def get_value(self, row: int, col: int) -> str:
+        """
+        Gets the value (piece identifier) at the given position in the grid.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            str: The piece identifier at the specified position.
+        """
+        return self.grid[row][col]
+
+    def print(self):
+        """
+        Prints the grid layout.
+
+        Args:
+            valid_positions (list): A list of tuples representing valid positions.
+        """
+        for row in self.grid:
+            print('\t'.join(row))
+
+    # Goal Test Handling Functions
+
     def get_reachable(self, row: int, col: int) -> list:
         """
         Gets the reachable positions from the given position.
@@ -72,43 +97,63 @@ class Board:
         return reachable
 
     def is_connected_left(self, piece:str, row: int, col: int) -> bool:
-            # Sees if a piece is connected to the left
-            # If piece has a left neighbor
-            if col > 0:
-                # If the left neighbor is connected to the right neighbor
-                left_piece = self.get_value(row, col - 1)
-                if piece in ('FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
-                    if left_piece in ('FD', 'BC', 'BB', 'BD', 'VD', 'VB', 'LH'):
-                        return True
-                else:
-                    if left_piece not in ('FD', 'BC', 'BB', 'BD', 'VD', 'VB', 'LH'):
-                        return True
-                return False 
-            
-            # Then it is a border piece
-            # See if it is a corner piece
-            if self.is_corner_upper_left(row, col):
-                if piece in ('FB', 'FD', 'VB'):
+        """
+        Checks if the piece is connected to the left.
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece.
+            col (int): The column index of the piece.
+        
+        Returns:
+            bool: True if the piece is connected to the left, False otherwise.
+        """
+        # If piece has a left neighbor
+        if col > 0:
+            # If the left neighbor is connected to the right neighbor
+            left_piece = self.get_value(row, col - 1)
+            if piece in ('FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
+                if left_piece in ('FD', 'BC', 'BB', 'BD', 'VD', 'VB', 'LH'):
                     return True
-                else :
-                    return False
-                
-            # See if it is a border piece
-            if self.is_edge_left(row, col):
-                if piece in ('FC', 'FB', 'FD', 'BD', 'VB', 'VD', 'LV'):
+            else:
+                if left_piece not in ('FD', 'BC', 'BB', 'BD', 'VD', 'VB', 'LH'):
                     return True
-                else:
-                    return False
+            return False 
+        
+        # Then it is a border piece
+        # See if it is a corner piece
+        if self.is_corner_upper_left(row, col):
+            if piece in ('FB', 'FD', 'VB'):
+                return True
+            else :
+                return False
             
-            if self.is_corner_lower_left(row, col):
-                if piece in ('FC', 'FD', 'VD'):
-                    return True 
-                else:       
-                    return False
-            return True
+        # See if it is a border piece
+        if self.is_edge_left(row, col):
+            if piece in ('FC', 'FB', 'FD', 'BD', 'VB', 'VD', 'LV'):
+                return True
+            else:
+                return False
+        
+        if self.is_corner_lower_left(row, col):
+            if piece in ('FC', 'FD', 'VD'):
+                return True 
+            else:       
+                return False
+        return True
     
     def is_connected_right(self, piece:str, row: int, col: int) -> bool:
-        # Sees if a piece is connected to the right
+        """ 
+        Checks if the piece is connected to the right.
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece.
+            col (int): The column index of the piece.
+
+        Returns:
+            bool: True if the piece is connected to the right, False otherwise.
+        """
         # If piece has a right neighbor
         if col < len(self.grid[0]) - 1:
             # If the right neighbor is connected to the left neighbor
@@ -144,7 +189,17 @@ class Board:
         return True
 
     def is_connected_upper(self, piece:str, row: int, col: int) -> bool:
-        # Sees if a piece is connected to the upper
+        """ 
+        Checks if the piece is connected to the upper.
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece.
+            col (int): The column index of the piece.
+        
+        Returns:
+            bool: True if the piece is connected to the upper, False otherwise.
+        """
         # If piece has a upper neighbor
         if row > 0:
             # If the upper neighbor is connected to the lower neighbor
@@ -180,7 +235,17 @@ class Board:
         return True
                 
     def is_connected_lower(self, piece:str, row: int, col: int) -> bool:
-        # Sees if a piece is connected to the lower
+        """
+        Checks if the piece is connected to the lower.  
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece.
+            col (int): The column index of the piece.
+        
+        Returns:
+            bool: True if the piece is connected to the lower, False otherwise.
+        """
         # If piece has a lower neighbor
         if row < len(self.grid) - 1:
             # If the lower neighbor is connected to the upper neighbor
@@ -215,18 +280,8 @@ class Board:
                 return False
         return True
 
-    def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
-        """ Devolve os valores imediatamente acima e abaixo, respectivamente. """
-        above = None if row == 0 else self.grid[row - 1][col]
-        below = None if row == len(self.grid) - 1 else self.grid[row + 1][col]
-        return above, below
+    # Board Edge and Corner Detection Functions
 
-    def adjacent_horizontal_values(self, row: int, col: int) -> (str, str):
-        """ Devolve os valores imediatamente à esquerda e à direita, respectivamente. """
-        left = None if col == 0 else self.grid[row][col - 1]
-        right = None if col == len(self.grid[0]) - 1 else self.grid[row][col + 1]
-        return left, right
-    
     def is_corner_upper_right(self, row: int, col: int) -> bool:
         """
         Checks if the position is the upper right corner of the grid.
@@ -239,33 +294,6 @@ class Board:
             bool: True if the position is the upper right corner, False otherwise.
         """
         return row == 0 and col == len(self.grid[0]) - 1
-    
-    def is_connected_horizontal(self, row: int, col: int, isLeft: bool) -> bool:
-        """ Verifica se a peça na posição (row, col) está ligada à direita. """
-        horizontal_pairs = [['FD', 'BC'], ['FD', 'BB'], ['FD', 'BE'], ['FD', 'VC'], ['FD', 'VE'], ['FD', 'LH'], 
-                            ['BC','BC'] ,['BC', 'BB'], ['BC', 'BE'], ['BC', 'FE'],['BC', 'VC'], ['BC', 'VE'], ['BC', 'LH'],
-                            ['BB','BB'], ['BB', 'FE'], ['BC', 'BC'], ['BB', 'BE'], ['BB', 'VC'], ['BB', 'VE'], ['BB', 'LH'],
-                            ['BD', 'FE'], ['BD', 'BC'], ['BD', 'BB'] , ['BD', 'VC'], ['BD', 'VE'], ['BD', 'LH'], ['BD', 'BE'],
-                            ['VB', 'FE'], ['VB', 'BC'], ['VB', 'BB'], ['VB', 'BE'], ['VB', 'VC'], ['VB', 'VE'], ['VB', 'LH'],
-                            ['LH', 'FE'], ['LH', 'BC'], ['LH', 'BB'], ['LH', 'BE'], ['LH', 'VC'], ['LH', 'VE'], ['LH', 'LH'],
-                            ['VD', 'FE'], ['VD', 'BC'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'VC'],['VD', 'LH']]
-        horizontal = self.adjacent_horizontal_values(row, col) # left, right
-
-        if isLeft:
-            return ([self.grid[row][col], horizontal[1]] in horizontal_pairs)
-        else:
-            return ([horizontal[0], self.grid[row][col]] in horizontal_pairs)
-                
-    def is_connected_vertical(self, row: int, col: int, isUpper: bool) -> bool:
-        """ Verifica se a peça na posição (row, col) está ligada acima. """
-        vertical_pairs = [['FC', 'BB'], ['FC', 'BE'], ['FC', 'BD'], ['FC', 'VB'], ['FC', 'VE'], ['FC', 'LV'],
-                          ['BC', 'FB'], ['BC', 'BB'], ['BC', 'BE'], ['BC', 'BD'], ['BC', 'VB'], ['BC', 'VE'], ['BC', 'LV'], 
-                          ['BE', 'BD'], ['BE', 'VB'], ['BE', 'VE'], ['BE', 'LV'], ['BD', 'FB'], ['BD', 'VB'], ['BD', 'VE'], ['BD', 'LV'], ['VC', 'FB'], ['VC', 'BB'], ['VC', 'BD'], ['VC', 'VB'], ['VC', 'VE'], ['VC', 'LV'], ['VD', 'FB'], ['VD', 'BB'], ['VD', 'BE'], ['VD', 'BD'], ['VD', 'VB'], ['VD', 'VE'], ['VD', 'LV'], ['LV', 'FB'], ['LV', 'BB'], ['LV', 'BE'], ['LV', 'BD'], ['LV', 'VB'], ['LV', 'VE'], ['LV', 'LV']]
-        vertical = self.adjacent_vertical_values(row, col) # above, below
-        if not isUpper:
-            return ([self.grid[row][col], vertical[0] ] in vertical_pairs) 
-        else:
-            return ([vertical[1], self.grid[row][col]] in vertical_pairs)
     
     def is_corner_upper_left(self, row: int, col: int) -> bool:
         """
@@ -358,59 +386,9 @@ class Board:
         """
         return col == len(self.grid[0]) - 1          
 
-    def get_value(self, row: int, col: int) -> str:
-        """
-        Gets the value (piece identifier) at the given position in the grid.
-
-        Args:
-            row (int): The row index of the position.
-            col (int): The column index of the position.
-
-        Returns:
-            str: The piece identifier at the specified position.
-        """
-        return self.grid[row][col]
-
-    def print(self):
-        """
-        Prints the grid layout.
-
-        Args:
-            valid_positions (list): A list of tuples representing valid positions.
-        """
-        for row in self.grid:
-            print('\t'.join(row))
-
-    def is_fixed_piece(self, row: int, col: int) -> bool:
-        """
-        Checks if the piece at the given position is fixed (already in its final position).
-
-        Args:
-            row (int): The row index of the piece.
-            col (int): The column index of the piece.
-
-        Returns:
-            bool: True if the piece is fixed, False otherwise.
-        """
-        return (row, col) in self.explored
-
-    def validate_pipe(self, row: int, col: int):
-        """
-        Validates the pipe at the given position.
-
-        Args:
-            row (int): The row index of the pipe.
-            col (int): The column index of the pipe.
-        """
-
-        # Check if the piece is already in the list of valid positions
-        if not self.is_fixed_piece(row, col):
-
-            # If not, add it to the list
-            self.explored.append((row, col))
+    # Valid Actions Determination Functions Based on Position
 
     def valid_upper_left_corner_actions(piece: str):
-
         """
         Determines valid actions for a piece located at the upper left corner of the grid.
 
@@ -420,7 +398,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece at the upper left corner.
         """
-
         # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FB', 'FD']
@@ -430,7 +407,6 @@ class Board:
             return ['VB']
         
     def valid_upper_right_corner_actions(piece: str):
-
         """
         Determines valid actions for a piece located at the upper right corner of the grid.
 
@@ -440,7 +416,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece at the upper right corner.
         """
-
          # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FB', 'FE']
@@ -450,7 +425,6 @@ class Board:
             return ['VE']
         
     def valid_lower_left_corner_actions(piece: str):
-        
         """
         Determines valid actions for a piece located at the lower left corner of the grid.
 
@@ -460,7 +434,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece at the lower left corner.
         """
-
          # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FC', 'FD']
@@ -470,7 +443,6 @@ class Board:
             return ['VD']
          
     def valid_lower_right_corner_actions(piece: str):
-
         """
         Determines valid actions for a piece located at the lower right corner of the grid.
 
@@ -480,7 +452,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece at the lower right corner.
         """
-
          # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FC', 'FE']
@@ -490,7 +461,6 @@ class Board:
             return ['VC']
         
     def valid_upper_edge_actions(piece: str):
-
         """
         Determines valid actions for a piece located at the upper edge of the grid.
 
@@ -500,7 +470,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece at the upper edge.
         """
-
         # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FB', 'FD', 'FE']
@@ -518,7 +487,6 @@ class Board:
             return ['LH']
         
     def valid_lower_edge_actions(piece: str):
-            
         """
         Determines valid actions for a piece located at the lower edge of the grid.
 
@@ -528,7 +496,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece at the lower edge.
         """
-            
         # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FC', 'FD', 'FE']
@@ -546,7 +513,6 @@ class Board:
             return ['LH']
             
     def valid_left_edge_actions(piece: str):
-        
         """
         Determines valid actions for a piece located at the left edge of the grid.
 
@@ -556,7 +522,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece at the left edge.
         """
-
         # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FC', 'FB', 'FD']
@@ -573,8 +538,7 @@ class Board:
         if piece in ('LH', 'LV'):
             return ['LV']
         
-    def valid_right_edge_actions(piece: str):
-            
+    def valid_right_edge_actions(piece: str):    
         """
         Determines valid actions for a piece located at the right edge of the grid.
 
@@ -583,8 +547,7 @@ class Board:
 
         Returns:
             list: A list of valid actions for the piece at the right edge.
-        """
-        
+        """   
         # See if it is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FC', 'FB', 'FE']
@@ -601,8 +564,9 @@ class Board:
         if piece in ('LH', 'LV'):
             return ['LV']
 
-    def valid_actions_with_upper_neighbor(piece: str, upper_neighbor: str):
+    # Valid Actions Determination Functions Based on Neighbors
 
+    def valid_actions_with_upper_neighbor(piece: str, upper_neighbor: str):
         """
         Returns valid actions for a piece considering the correct orientation of the upper neighbor.
 
@@ -613,7 +577,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece.
         """
-
         # If the piece is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
 
@@ -662,7 +625,6 @@ class Board:
         return []
     
     def valid_actions_with_lower_neighbor(piece: str, lower_neighbor: str):
-
         """
         Returns valid actions for a piece considering the correct orientation of the lower neighbor.
 
@@ -673,7 +635,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece.
         """
-
         # If the piece is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
 
@@ -719,7 +680,6 @@ class Board:
                 return ['LV'] 
             
     def valid_actions_with_left_neighbor(piece: str, left_neighbor: str):
-
         """
         Returns valid actions for a piece considering the correct orientation of the left neighbor.
 
@@ -729,8 +689,7 @@ class Board:
 
         Returns:
             list: A list of valid actions for the piece.
-        """
-        
+        """  
         # If the piece is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
 
@@ -778,7 +737,6 @@ class Board:
         return []
 
     def valid_actions_with_right_neighbor(piece: str, right_neighbor: str):
-
         """
         Returns valid actions for a piece considering the correct orientation of the right neighbor.
 
@@ -789,7 +747,6 @@ class Board:
         Returns:
             list: A list of valid actions for the piece.
         """
-
         # If the piece is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
 
@@ -837,7 +794,15 @@ class Board:
         return []
     
     def get_all_rotations(self,piece: str):
+        """
+        Returns all possible rotations for a piece.
 
+        Args:
+            piece (str): The piece identifier.
+
+        Returns:
+            list: A list of all possible rotations for the piece.
+        """
         # If the piece is a locking pipe
         if piece in ('FC', 'FB', 'FE', 'FD'):
             return ['FC', 'FB', 'FE', 'FD']
@@ -853,6 +818,8 @@ class Board:
         # If the piece is a straight pipe
         if piece in ('LH', 'LV'):
             return ['LH', 'LV']
+
+    # Board Rotation Functions
 
     def get_valid_rotations_pos(self, piece: str, row: int, col: int) -> list:     
         """
@@ -989,7 +956,6 @@ class Board:
         return intersect_rotations
 
     def get_valid_rotations(self, piece: str, row: int, col: int) -> list:
-
         """
         Returns valid rotations for a piece considering both its position and neighboring pieces.
 
@@ -1001,7 +967,6 @@ class Board:
         Returns:
             list: A list of valid rotations for the piece at the specified position.
         """
-
         # Check if the piece is already in the correct position
         if (row, col) in self.explored:
             # If so, return an empty list
@@ -1064,7 +1029,7 @@ class PipeManiaState:
     def __lt__(self, other):
         """ Este método é utilizado em caso de empate na gestão da lista
         de abertos nas procuras informadas. """
-        return self.id < other.id
+        return len(self.board.explored) > len(other.board.explored)
     
     def get_value(self, row: int, col: int) -> str:
         """ Devolve o valor na posição (row, col). """
@@ -1143,7 +1108,7 @@ class PipeMania(Problem):
                         if available_actions == []:
                             if unique_actions == []:
                                 state.board.invalid = True
-                                return [(0,0,0)]
+                                return []
                             else:
                                 #print("Available actions: ", unique_actions)
                                 #state.board.print()

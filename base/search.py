@@ -89,7 +89,6 @@ class Node:
         return "<Node {}>".format(self.state)
 
     def __lt__(self, node):
-        # Give priority to the node with the lowest actions available
         return self.state < node.state
 
     def expand(self, problem):
@@ -190,20 +189,13 @@ def breadth_first_tree_search(problem):
     while frontier:
         node = frontier.popleft()
         if problem.goal_test(node.state):
-            print("Cost:",node.path_cost)
             return node
-        
-        print("Cost:",node.path_cost)
-        print("Current Board:")
-        node.state.board.print()
-        print("\n")
-
         frontier.extend(node.expand(problem))
-
     return None
 
+
 def depth_first_tree_search(problem):
-    """ 
+    """
     [Figure 3.7]
     Search the deepest nodes in the search tree first.
     Search through the successors of a problem to find a goal.
@@ -215,11 +207,8 @@ def depth_first_tree_search(problem):
 
     while frontier:
         node = frontier.pop()
-
         if problem.goal_test(node.state):
-            print("Cost:",node.path_cost)
             return node
-        
         frontier.extend(node.expand(problem))
     return None
 
