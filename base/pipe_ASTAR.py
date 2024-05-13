@@ -17,6 +17,8 @@ from search import (
     greedy_search,
     recursive_best_first_search,
 )
+import time
+import psutil
 
 import colorama
 from colorama import Fore, Back, Style
@@ -39,7 +41,8 @@ class Board:
         # Board for the board
         self.board = self
 
-        self.explored = []
+        # init the explored grid with zeros
+        self.explored = [[0 for _ in range(len(grid[0]))] for _ in range(len(grid))]
 
         self.invalid = False
 
@@ -903,7 +906,7 @@ class Board:
 
         # See if upper neighbor is in the correct orientation 
         if row > 0:
-            if (row-1, col) in self.explored:
+            if self.explored[row-1][col] != 0:
                 
                 # Get the valid rotations based on the upper neighbor
                 upper.extend(Board.valid_actions_with_upper_neighbor(piece, self.board.explored_grid[row-1][col]))
@@ -912,7 +915,7 @@ class Board:
 
         # See if lower neighbor is in the correct orientation
         if row < len(self.board.grid) - 1:
-            if (row+1, col) in self.explored:
+            if self.explored[row+1][col] != 0:
 
                 # Get the valid rotations based on the lower neighbor
                 lower.extend(Board.valid_actions_with_lower_neighbor(piece, self.board.explored_grid[row+1][col]))
@@ -921,7 +924,7 @@ class Board:
         
         # See if left neighbor is in the correct orientation
         if col > 0:
-            if (row, col-1) in self.explored:
+            if self.explored[row][col-1] != 0:
 
                 # Get the valid rotations based on the left neighbor
                 left.extend(Board.valid_actions_with_left_neighbor(piece, self.board.explored_grid[row][col-1]))
@@ -931,7 +934,7 @@ class Board:
 
         # See if right neighbor is in the correct orientation
         if col < len(self.board.grid[0]) - 1:
-            if (row, col+1) in self.explored:
+            if self.explored[row][col+1] != 0:
 
                 # Get the valid rotations based on the right neighbor
                 right.extend(Board.valid_actions_with_right_neighbor(piece, self.board.explored_grid[row][col+1]))
@@ -972,7 +975,7 @@ class Board:
             list: A list of valid rotations for the piece at the specified position.
         """
         # Check if the piece is already in the correct position
-        if (row, col) in self.explored:
+        if self.explored[row][col] != 0:
             # If so, return an empty list
             return []
 
@@ -1033,7 +1036,7 @@ class PipeManiaState:
     def __lt__(self, other):
         """ Este método é utilizado em caso de empate na gestão da lista
         de abertos nas procuras informadas. """
-        return len(self.board.explored) > len(other.board.explored)
+        return len(self.board.explored[0])*len(self.board.explored) > len(other.board.explored[0])*len(other.board.explored)
     
     def get_value(self, row: int, col: int) -> str:
         """ Devolve o valor na posição (row, col). """
@@ -1073,7 +1076,7 @@ class PipeMania(Problem):
                     valid_rotations = state.board.get_valid_rotations(piece, row, col)
                     if len(valid_rotations) == 1:
                         # Mark the piece as explored
-                        state.board.explored.append((row, col))
+                        state.board.explored[row][col] = 1
 
                         # Put the new piece position in the explored grid
                         state.board.explored_grid[row][col] = valid_rotations[0][0]
@@ -1088,7 +1091,7 @@ class PipeMania(Problem):
         for s in range(num_rows + num_cols - 1):
             for row in range(max(0, s - num_cols + 1), min(s + 1, num_rows)):
                 col = s - row
-                if (row, col) not in state.board.explored:
+                if state.board.explored[row][col] == 0:
                     piece = state.board.get_value(row, col)
                     valid_rotations = state.board.get_valid_rotations(piece, row, col)
                     if len(valid_rotations) > 1:
@@ -1123,7 +1126,7 @@ class PipeMania(Problem):
                         
                     else:
                         # Mark the piece as explored
-                        state.board.explored.append((row, col))
+                        state.board.explored[row][col] = 1
 
                         # Put the new piece position in the explored grid
                         state.board.explored_grid[row][col] = valid_rotations[0][0]
@@ -1202,7 +1205,7 @@ class PipeMania(Problem):
         new_board = Board(new_grid)
 
         # Copy the explored positions
-        new_board.explored = state.board.explored.copy() 
+        new_board.explored = [row[:] for row in state.board.explored] 
 
         new_board.unique_to_be_explored = state.board.unique_to_be_explored
 
@@ -1213,14 +1216,14 @@ class PipeMania(Problem):
 
         if len(action) == 3 and isinstance(action[0], str):
             new_board.grid[action[1]][action[2]] = action[0]
-            new_board.explored.append((action[1], action[2]))
+            new_board.explored[action[1]][action[2]] = 1
 
             # Add them to the explored grid
             new_board.explored_grid[action[1]][action[2]] = action[0]
         else:
             for rotation in action:   
                 new_board.grid[rotation[1]][rotation[2]] = rotation[0]
-                new_board.explored.append((rotation[1], rotation[2]))
+                new_board.explored[rotation[1]][rotation[2]] = 1
 
                 # Add them to the explored grid
                 new_board.explored_grid[rotation[1]][rotation[2]] = rotation[0]
@@ -1252,8 +1255,23 @@ class Piece():
     
 
 if __name__ == "__main__":
+    start_time = time.time()
+
+    # Track initial memory usage
+    initial_memory = psutil.Process().memory_info().rss
     board = Board.parse_instance()
     problem = PipeMania(board)
     goal_node = astar_search(problem)
     goal_node.state.board.print()
+    
+    # Calculate execution time
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print("Execution time:", execution_time, "seconds")
+
+    # Calculate memory usage
+    final_memory = psutil.Process().memory_info().rss
+    memory_usage = final_memory - initial_memory
+    memory_usage_MB = memory_usage / (1024 * 1024)
+    print("Memory usage:", memory_usage_MB, "MB")
     pass
