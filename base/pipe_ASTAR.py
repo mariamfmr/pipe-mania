@@ -46,6 +46,8 @@ class Board:
         self.unique_to_be_explored = True
 
         self.action_count = 0
+
+        self.board_size = len(grid) * len(grid[0])
         
         # Grid for the explored board with the same dimensions as the original grid
         self.explored_grid = [[' ' for _ in range(len(grid[0]))] for _ in range(len(grid))]
@@ -1228,8 +1230,8 @@ class PipeMania(Problem):
     def h(self, node: Node):
         """ Função heuristica utilizada para a procura A*. """
         if node.state.board.invalid:
-            return len(node.state.board.grid) * len(node.state.board.grid[0]) + 1
-        return len(node.state.board.grid) * len(node.state.board.grid[0]) - node.state.board.action_count
+            return node.state.board.board_size + 1
+        return node.state.board.board_size - node.state.board.action_count
 
 class Piece():
     def __init__(self, piece_type: str):
