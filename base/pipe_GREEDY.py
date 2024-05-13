@@ -17,14 +17,14 @@ from search import (
     greedy_search,
     recursive_best_first_search,
 )
-"""
+
 import time
 import psutil
 
 import colorama
 from colorama import Fore, Back, Style
 colorama.init(autoreset=True)
-"""
+
 
 class Board:
 
@@ -1143,11 +1143,8 @@ class PipeMania(Problem):
         Returns:
             bool: True if the state is a goal state, False otherwise.
         """
-        for row in range(len(state.board.grid)):
-            for col in range(len(state.board.grid[0])):
-                piece = state.board.get_value(row, col)
-                if not Piece(piece).isConnected(state.board, row, col):
-                    return False
+        if state.board.explored_count != state.board.board_size:
+            return False
                 
          # Start from the beggining (0,0)
         source = (0,0)
@@ -1251,17 +1248,17 @@ class Piece():
     
 
 if __name__ == "__main__":
-    """
+
     start_time = time.time()
 
     # Track initial memory usage
     initial_memory = psutil.Process().memory_info().rss
-    """
+
     board = Board.parse_instance()
     problem = PipeMania(board)
     goal_node = greedy_search(problem)
     goal_node.state.board.print()
-    """
+
     # Calculate execution time
     end_time = time.time()
     execution_time = end_time - start_time
@@ -1272,5 +1269,5 @@ if __name__ == "__main__":
     memory_usage = final_memory - initial_memory
     memory_usage_MB = memory_usage / (1024 * 1024)
     print("Memory usage:", memory_usage_MB, "MB")
-    """
+  
     pass
