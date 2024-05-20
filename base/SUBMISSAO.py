@@ -1,3 +1,7 @@
+# pipe.py: Template para implementação do projeto de Inteligência Artificial 2023/2024.
+# Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
+# Além das funções e classes sugeridas, podem acrescentar outras que considerem pertinentes.
+
 # Grupo 01:
 # 105875 Maria Ramos
 # 106909 Guiherme Campos
@@ -21,7 +25,6 @@ import colorama
 from colorama import Fore, Back, Style
 colorama.init(autoreset=True)
 
-
 class Board:
 
     def __init__(self, grid):
@@ -39,36 +42,57 @@ class Board:
         # Board for the board
         self.board = self
 
-        # Bool to check if the board is invalid
         self.invalid = False
 
-        # Bool to check if all unique rotations have been explored
         self.unique_to_be_explored = True
 
-        # Number of actions taken in last search
         self.action_count = 0
 
-        # Number of pieces in the board
         self.board_size = len(grid) * len(grid[0])
 
-        # Number of explored pieces (rotated)
         self.explored_count = 0
 
-        # Number of rows in the grid
         self.num_rows = len(grid)
 
-        # Number of columns in the grid
         self.num_cols = len(grid[0])
         
         # Grid for the explored board with the same dimensions as the original grid
         self.explored_grid = [[' ' for _ in range(len(grid[0]))] for _ in range(len(grid))]
 
-        # Keeps track of the last action taken
+        self.unique_grid = [[' ' for _ in range(len(grid[0]))] for _ in range(len(grid))]   
+
         self.last_action = None
 
+    def is_loop(self, row: int, col: int) -> bool:
+        """
+        Checks if the position changed to a loop. Tries to find an unexplored position from the current position. 
+        If it finds one, then it is not a loop. If it goes through all reachable positions and finds no unexplored position,
+        then it is a loop.
 
-    # Board Exploration Functions
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
 
+        Returns:
+            bool: True if the position is a loop, False otherwise.
+        """
+        visited = set()
+        queue = [(row, col)]
+
+        while queue:
+            current = queue.pop(0)
+            visited.add(current)
+
+            for neighbor in self.get_reachable(current[0], current[1]):
+                if self.explored_grid[neighbor[0]][neighbor[1]] == ' ':
+                    return False
+                if neighbor not in visited:
+                    queue.append(neighbor)
+
+        return True
+        
+        
+    
     def get_value(self, row: int, col: int) -> str:
         """
         Gets the value (piece identifier) at the given position in the grid.
@@ -83,18 +107,16 @@ class Board:
         return self.grid[row][col]
 
     def print(self):
-        """
-        Prints the grid layout.
-
-        Args:
-            valid_positions (list): A list of tuples representing valid positions.
-        """
-        for row in self.grid:
-            print('\t'.join(row))
-
+        
+        for i, row in enumerate(self.grid):
+            for j, piece in enumerate(row):
+                if self.unique_grid[i][j] != ' ':
+                    print(Fore.GREEN + piece + "g", end='\t')
+                else:
+                    print(piece, end='\t')
+            print()  # print a newline at the end of each row
 
     # Goal Test Handling Functions
-
     def get_reachable_explored(self, row: int, col: int) -> list:
         """
         Gets the reachable positions from the given position.
@@ -130,6 +152,162 @@ class Board:
 
         return reachable
 
+    def get_reachable(self, row: int, col: int) -> list:
+        """
+        Gets the reachable positions from the given position.
+
+        Args:
+            row (int): The row index of the position.
+            col (int): The column index of the position.
+
+        Returns:
+            list: A list of reachable positions from the given position.
+        """
+        reachable = []
+        piece = self.get_value(row, col)
+        if piece in ('FC', 'BC', 'BE', 'BD', 'VC', 'VD', 'LV'):
+           reachable.append((row - 1, col))
+        if piece in ('FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV'):
+            reachable.append((row + 1, col))
+        if piece in ('FD', 'BC', 'BB', 'BD', 'VD', 'VB', 'LH'):
+            reachable.append((row, col + 1))
+        if piece in ('FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH'):
+            reachable.append((row, col - 1))
+
+        # Make sure the reachable positions are within the grid
+        reachable = [(r, c) for r, c in reachable if 0 <= r < self.num_rows and 0 <= c < self.num_cols]
+
+        return reachable
+
+    def is_connected_left(self, piece: str, row: int, col: int) -> bool:
+        """
+        Checks if the piece is connected to the left.
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece.
+            col (int): The column index of the piece.
+        
+        Returns:
+            bool: True if the piece is connected to the left, False otherwise.
+        """
+        
+        # If piece has a left neighbor
+        if col > 0:
+            left_piece = self.get_value(row, col - 1)
+            return left_piece in allowed_left_neighbors.get(piece, [])
+        
+        # Then it is a border piece
+        # See if it is a corner piece
+        if self.is_corner_upper_left(row, col):
+            return piece in ('FB', 'FD', 'VB')
+            
+        # See if it is a border piece
+        if self.is_edge_left(row, col):
+            return piece in ('FC', 'FB', 'FD', 'BD', 'VB', 'VD', 'LV')
+        
+        if self.is_corner_lower_left(row, col):
+            return piece in ('FC', 'FD', 'VD')
+
+        return True
+    
+    def is_connected_right(self, piece: str, row: int, col: int) -> bool:
+        """
+        Checks if the piece is connected to the right.
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece.
+            col (int): The column index of the piece.
+
+        Returns:
+            bool: True if the piece is connected to the right, False otherwise.
+        """
+
+        # If piece has a right neighbor
+        if col < self.num_cols - 1:
+            right_piece = self.get_value(row, col + 1)
+            return right_piece in allowed_right_neighbors.get(piece, [])
+        
+        # If it is a border piece
+        # See if it is a corner piece
+        if self.is_corner_upper_right(row, col):
+            return piece in ('FE', 'FB', 'VE')
+        
+        # See if it is a border piece
+        if self.is_edge_right(row, col):
+            return piece in ('FC', 'FE', 'FB', 'BE', 'VC', 'VE', 'LV')
+  
+        if self.is_corner_lower_right(row, col):
+            return piece in ('FC', 'FE', 'VC')
+
+        return True
+    
+
+    def is_connected_upper(self, piece: str, row: int, col: int) -> bool:
+        """
+        Checks if the piece is connected to the upper.
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece.
+            col (int): The column index of the piece.
+        
+        Returns:
+            bool: True if the piece is connected to the upper, False otherwise.
+        """
+        
+        # If piece has an upper neighbor
+        if row > 0:
+            upper_piece = self.get_value(row - 1, col)
+            return upper_piece in allowed_upper_neighbors.get(piece, [])
+        
+        # If it is a border piece
+        if self.is_corner_upper_left(row, col):
+            return piece in ('FB', 'FD', 'VB')
+        
+        if self.is_corner_upper_right(row, col):
+            return piece in ('FE', 'FB', 'VE')
+        
+        if self.is_edge_upper(row, col):
+            return piece in ('FD', 'FB', 'FE', 'BB', 'VB', 'VE', 'LH')
+        
+        return True
+
+                
+    def is_connected_lower(self, piece:str, row: int, col: int) -> bool:
+        """
+        Checks if the piece is connected to the lower.  
+
+        Args:
+            piece (str): The piece identifier.
+            row (int): The row index of the piece.
+            col (int): The column index of the piece.
+        
+        Returns:
+            bool: True if the piece is connected to the lower, False otherwise.
+        """
+        
+        # If piece has a lower neighbor
+        if row < self.num_rows - 1:
+            lower_piece = self.get_value(row + 1, col)
+            if lower_piece in allowed_lower_neighbors.get(piece, []):
+                return True
+            return False
+
+        # If it is a border piece
+        # See if it is a corner piece
+        if self.is_corner_lower_right(row, col):
+            return piece in ('FC', 'FE', 'VC')
+
+        if self.is_corner_lower_left(row, col):
+            return piece in ('FC', 'FD', 'VD')
+                
+        # See if it is a border piece
+        if self.is_edge_lower(row, col):
+            return piece in ('FC', 'FE', 'FD', 'BC', 'VC', 'VD', 'LH')
+
+        return True
 
     # Board Edge and Corner Detection Functions
 
@@ -236,7 +414,6 @@ class Board:
             bool: True if the position is on the right edge, False otherwise.
         """
         return col == self.num_cols - 1          
-
 
     # Valid Actions Determination Functions Based on Position
 
@@ -415,7 +592,6 @@ class Board:
         # See if it is a straight pipe
         if piece in ('LH', 'LV'):
             return ['LV']
-
 
     # Valid Actions Determination Functions Based on Neighbors
 
@@ -678,26 +854,12 @@ class Board:
         return rotations.get(piece, [])
 
     def f_piece_restrictions(self, row: int, col: int) -> list:
-        """
-        Returns valid rotations based on the F pieces in the neighbors of the given position.
-
-        Args:
-            row (int): The row index of the position.
-            col (int): The column index of the position.
-
-        Returns:
-            list: A list of valid rotations based on the F pieces in the neighbors.
-        """
-
         piece = self.board.get_value(row, col)
         f_neighbors_count = 0
-
-        # Neighbors that are F pieces
         upper = False
         lower = False
         left = False
         right = False
-
         # Returns [upper, lower, left, right] neighbors that are F pieces
         if row > 0:
             # If upper neighbor is starts with F
@@ -723,10 +885,8 @@ class Board:
                 right = True
                 f_neighbors_count += 1
         
-        # If piece starts with F
+        # If piece starts with F and has at least 1 F neighbor
         if piece.startswith('F'):
-
-            # If there is only one F neighbor
             if f_neighbors_count == 1:
                 if upper == True:
                     return ['FB', 'FE', 'FD']
@@ -737,7 +897,6 @@ class Board:
                 if right == True:
                     return ['FC', 'FB', 'FE']
             
-            # If there are two F neighbors
             if f_neighbors_count == 2:
                 if upper == True and lower == True:
                     return ['FE', 'FD']
@@ -751,8 +910,7 @@ class Board:
                     return ['FE', 'FC']
                 if lower == True and left == True:
                     return ['FD', 'FC']
-            
-            # If there are three F neighbors
+                
             if f_neighbors_count == 3:
                 if upper == False:
                     return ['FC']
@@ -762,68 +920,8 @@ class Board:
                     return ['FE']
                 if right == False:
                     return ['FD']
-            
-        # If the piece starts with V
-        if piece.startswith('V'):
-
-            # If there is only two F neighbor
-            if f_neighbors_count == 2:
-                if upper == True and right == True:
-                    return ['VC', 'VE', 'VB']
-                if upper == True and left == True:
-                    return ['VD', 'VE', 'VB']
-                if lower == True and right == True:
-                    return ['VC', 'VD', 'VE']
-                if lower == True and left == True:
-                    return ['VC', 'VD', 'VB']
-            
-            # If there are three F neighbors
-            if f_neighbors_count == 3:
-                if upper == False:
-                    return ['VC', 'VD']
-                if lower == False:
-                    return ['VB', 'VE']
-                if left == False:
-                    return ['VC', 'VE']
-                if right == False:
-                    return ['VD', 'VB']
-
-        # If the piece starts with L
-        if piece.startswith('L'):
-
-            # If there is only two F neighbor
-            if f_neighbors_count == 2:
-                if upper == True and lower == True:
-                    return ['LH']
-                if left == True and right == True:
-                    return ['LV']
                 
-            # If there are three F neighbors
-            if f_neighbors_count == 3:
-                if upper == False:
-                    return ['LV']
-                if lower == False:
-                    return ['LV']
-                if left == False:
-                    return ['LH']
-                if right == False:
-                    return ['LH']
-        
-        # If the piece starts with B
-        if piece.startswith('B'):
 
-            # If there are three F neighbor
-            if f_neighbors_count == 3:
-                if upper == False:
-                    return ['BE', 'BD', 'BC']
-                if lower == False:
-                    return ['BE','BD','BB']
-                if left == False:
-                    return ['BB', 'BC', 'BD']
-                if right == False:
-                    return ['BD', 'BC', 'BE']
-        return self.board.get_all_rotations(piece)
-        
     # Board Rotation Functions
 
     def get_valid_rotations_pos(self, piece: str, row: int, col: int) -> list:     
@@ -890,18 +988,12 @@ class Board:
         Returns:
             list: A list of valid rotations based on the neighboring pieces.
         """
-
-        # Initialize lists for the rotations of the neighbors
         upper = []
         lower = []
         left = []
         right = []
-
-        # Initialize a list to check if the neighbors are in the correct orientation
         exists = [False, False, False, False]   
         rotations = [upper, lower, left, right]
-
-        # Initialize a list to store the neighbors that are in the correct orientation
         existing_neighbors = []
 
         # See if upper neighbor is in the correct orientation 
@@ -979,7 +1071,6 @@ class Board:
         Returns:
             list: A list of valid rotations for the piece at the specified position.
         """
-
         # Check if the piece is already in the correct position
         if self.explored_grid[row][col] != ' ':
             # If so, return an empty list
@@ -1033,32 +1124,21 @@ from collections import deque
 class PipeManiaState:
     state_id = 0
 
+    state_possible_actions = []
+
     def __init__(self, board: Board):
-        """
-        Initializes a new PipeManiaState instance.
-
-        Args:
-            board (Board): The board
-
-        Returns:
-            PipeManiaState: A new instance of the PipeManiaState class.
-        """
         self.board = board
         self.id = PipeManiaState.state_id
         PipeManiaState.state_id += 1
 
 
     def __lt__(self, other):
-        """
-        Compares two states based on their action count. Used in case of a tie in informed search algorithms.
-
-        Args:
-            other (PipeManiaState): The other state to compare with.
-
-        Returns:
-            bool: True if the current state has more actions than the other state, False otherwise.
-        """
+        """ Este método é utilizado em caso de empate na gestão da lista
+        de abertos nas procuras informadas. """
         return self.board.action_count > other.board.action_count
+    def get_value(self, row: int, col: int) -> str:
+        """ Devolve o valor na posição (row, col). """
+        return self.board.grid[row][col]
 
 class PipeMania(Problem):
 
@@ -1084,6 +1164,8 @@ class PipeMania(Problem):
             return []
 
         if state.board.unique_to_be_explored:
+            state.board.print()
+            print("\n")
             for row in range(num_rows):
                 for col in range(num_cols):
                     piece = state.board.get_value(row, col)
@@ -1091,9 +1173,13 @@ class PipeMania(Problem):
                     if len(valid_rotations) == 1:
                         state.board.explored_grid[row][col] = valid_rotations[0][0]
                         available_actions.append(valid_rotations[0])
+                        state.board.unique_grid[row][col] = valid_rotations[0][0]
             if available_actions:
+                #Add positions to rotated list
+                
                 return [available_actions]
 
+        
         state.board.unique_to_be_explored = False
 
         center_row, center_col = num_rows // 2, num_cols // 2
@@ -1123,8 +1209,10 @@ class PipeMania(Problem):
                     unique_actions.append(valid_rotations[0])
 
         return [unique_actions]
-                       
+            
+            
     def goal_test(self, state: PipeManiaState)-> bool:
+
         """
         Checks if the given state is a goal state.
 
@@ -1146,6 +1234,9 @@ class PipeMania(Problem):
             return self.bfs(state, (state.board.last_action[-1][1], state.board.last_action[-1][2]))
         elif isinstance(state.board.last_action, tuple):
             return self.bfs(state, (state.board.last_action[1], state.board.last_action[2]))
+
+    
+
    
     def bfs(self, state, source):
         """
@@ -1191,6 +1282,7 @@ class PipeMania(Problem):
         return True
                                         
     def result(self, state: PipeManiaState, action):
+
         """
         Returns the resulting state after executing the given action on the given state.
 
@@ -1220,6 +1312,7 @@ class PipeMania(Problem):
 
         # Copy explored positions
         new_board.explored_grid = [row[:] for row in state.board.explored_grid]  
+        new_board.unique_grid = [row[:] for row in state.board.unique_grid]
 
         if len(action) == 3 and isinstance(action[0], str):
             new_board.grid[action[1]][action[2]] = action[0]
@@ -1239,41 +1332,23 @@ class PipeMania(Problem):
         return PipeManiaState(new_board)
 
     def h(self, node: Node):
-        """
-        Heuristic function used for A* search.
-        
-        Args:
-            node (Node): The current node in the search.
-            
-        Returns:
-            int: The heuristic value of the node.
-        """
-        # Check if the board is invalid
         if node.state.board.invalid:
-            # If so, return a high heuristic value
             return node.state.board.board_size + 1
 
-        # Return the number of unexplored positions
-        return node.state.board.board_size - node.state.board.explored_count
+        return node.state.board.action_count
+    
 
-if __name__ == "__main__":   
+if __name__ == "__main__":
     start_time = time.time()
 
     # Track initial memory usage
     initial_memory = psutil.Process().memory_info().rss
-
-    # Parse the board from the input
+    
     board = Board.parse_instance()
-
-    # Create a PipeMania problem instance
     problem = PipeMania(board)
-
-    # Perform a greedy search to solve the PipeMania puzzle
-    goal_node = recursive_best_first_search(problem)
-
-    # Print the solution
+    goal_node = greedy_search(problem)
     goal_node.state.board.print()
-
+    
     # Calculate execution time
     end_time = time.time()
     execution_time = end_time - start_time

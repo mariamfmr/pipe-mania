@@ -39,36 +39,26 @@ class Board:
         # Board for the board
         self.board = self
 
-        # Bool to check if the board is invalid
         self.invalid = False
 
-        # Bool to check if all unique rotations have been explored
         self.unique_to_be_explored = True
 
-        # Number of actions taken in last search
         self.action_count = 0
 
-        # Number of pieces in the board
         self.board_size = len(grid) * len(grid[0])
 
-        # Number of explored pieces (rotated)
         self.explored_count = 0
 
-        # Number of rows in the grid
         self.num_rows = len(grid)
 
-        # Number of columns in the grid
         self.num_cols = len(grid[0])
         
         # Grid for the explored board with the same dimensions as the original grid
         self.explored_grid = [[' ' for _ in range(len(grid[0]))] for _ in range(len(grid))]
 
-        # Keeps track of the last action taken
         self.last_action = None
 
-
-    # Board Exploration Functions
-
+    
     def get_value(self, row: int, col: int) -> str:
         """
         Gets the value (piece identifier) at the given position in the grid.
@@ -94,7 +84,7 @@ class Board:
 
 
     # Goal Test Handling Functions
-
+    
     def get_reachable_explored(self, row: int, col: int) -> list:
         """
         Gets the reachable positions from the given position.
@@ -236,7 +226,6 @@ class Board:
             bool: True if the position is on the right edge, False otherwise.
         """
         return col == self.num_cols - 1          
-
 
     # Valid Actions Determination Functions Based on Position
 
@@ -415,7 +404,6 @@ class Board:
         # See if it is a straight pipe
         if piece in ('LH', 'LV'):
             return ['LV']
-
 
     # Valid Actions Determination Functions Based on Neighbors
 
@@ -809,19 +797,6 @@ class Board:
                 if right == False:
                     return ['LH']
         
-        # If the piece starts with B
-        if piece.startswith('B'):
-
-            # If there are three F neighbor
-            if f_neighbors_count == 3:
-                if upper == False:
-                    return ['BE', 'BD', 'BC']
-                if lower == False:
-                    return ['BE','BD','BB']
-                if left == False:
-                    return ['BB', 'BC', 'BD']
-                if right == False:
-                    return ['BD', 'BC', 'BE']
         return self.board.get_all_rotations(piece)
         
     # Board Rotation Functions
@@ -1033,31 +1008,17 @@ from collections import deque
 class PipeManiaState:
     state_id = 0
 
+    state_possible_actions = []
+
     def __init__(self, board: Board):
-        """
-        Initializes a new PipeManiaState instance.
-
-        Args:
-            board (Board): The board
-
-        Returns:
-            PipeManiaState: A new instance of the PipeManiaState class.
-        """
         self.board = board
         self.id = PipeManiaState.state_id
         PipeManiaState.state_id += 1
 
 
     def __lt__(self, other):
-        """
-        Compares two states based on their action count. Used in case of a tie in informed search algorithms.
-
-        Args:
-            other (PipeManiaState): The other state to compare with.
-
-        Returns:
-            bool: True if the current state has more actions than the other state, False otherwise.
-        """
+        """ Este método é utilizado em caso de empate na gestão da lista
+        de abertos nas procuras informadas. """
         return self.board.action_count > other.board.action_count
 
 class PipeMania(Problem):
@@ -1123,8 +1084,10 @@ class PipeMania(Problem):
                     unique_actions.append(valid_rotations[0])
 
         return [unique_actions]
-                       
+            
+            
     def goal_test(self, state: PipeManiaState)-> bool:
+
         """
         Checks if the given state is a goal state.
 
@@ -1191,6 +1154,7 @@ class PipeMania(Problem):
         return True
                                         
     def result(self, state: PipeManiaState, action):
+
         """
         Returns the resulting state after executing the given action on the given state.
 
@@ -1239,48 +1203,25 @@ class PipeMania(Problem):
         return PipeManiaState(new_board)
 
     def h(self, node: Node):
-        """
-        Heuristic function used for A* search.
-        
-        Args:
-            node (Node): The current node in the search.
-            
-        Returns:
-            int: The heuristic value of the node.
-        """
-        # Check if the board is invalid
+        """ Função heuristica utilizada para a procura A*. """
         if node.state.board.invalid:
-            # If so, return a high heuristic value
             return node.state.board.board_size + 1
-
-        # Return the number of unexplored positions
         return node.state.board.board_size - node.state.board.explored_count
 
-if __name__ == "__main__":   
+if __name__ == "__main__": 
     start_time = time.time()
 
     # Track initial memory usage
-    initial_memory = psutil.Process().memory_info().rss
-
-    # Parse the board from the input
+    initial_memory = psutil.Process().memory_info().rss  
     board = Board.parse_instance()
-
-    # Create a PipeMania problem instance
     problem = PipeMania(board)
-
-    # Perform a greedy search to solve the PipeMania puzzle
-    goal_node = recursive_best_first_search(problem)
-
-    # Print the solution
+    goal_node = depth_first_tree_search(problem)
     goal_node.state.board.print()
-
     # Calculate execution time
     end_time = time.time()
     execution_time = end_time - start_time
     print("Execution time:", execution_time, "seconds")
 
-    
-    
     # Calculate memory usage
     final_memory = psutil.Process().memory_info().rss
     memory_usage = final_memory - initial_memory
