@@ -2,8 +2,6 @@
 # 105875 Maria Ramos
 # 106909 Guiherme Campos
 
-import sys
-import numpy as np
 from search import (
     Problem,
     Node,
@@ -14,12 +12,14 @@ from search import (
     recursive_best_first_search,
 )
 
-import time
-import psutil
+import sys
+from collections import deque
 
+"""import time
 import colorama
+import psutil
 from colorama import Fore, Back, Style
-colorama.init(autoreset=True)
+colorama.init(autoreset=True)"""
 
 
 class Board:
@@ -39,35 +39,38 @@ class Board:
         # Board for the board
         self.board = self
 
-        # Bool to check if the board is invalid
+        # Flag to check if the board is invalid
         self.invalid = False
 
-        # Bool to check if all unique rotations have been explored
+        # Auxiliar flag for the actions method
         self.unique_to_be_explored = True
 
-        # Number of actions taken in last search
+        # Number of actions taken
         self.action_count = 0
 
-        # Number of pieces in the board
-        self.board_size = len(grid) * len(grid[0])
+        # Number of pipes in the board
+        self.board_size = len(grid) * len(grid)
 
-        # Number of explored pieces (rotated)
+        # Number of explored pipes
         self.explored_count = 0
 
-        # Number of rows in the grid
         self.num_rows = len(grid)
 
-        # Number of columns in the grid
-        self.num_cols = len(grid[0])
+        self.num_cols = len(grid)
         
-        # Grid for the explored board with the same dimensions as the original grid
-        self.explored_grid = [[' ' for _ in range(len(grid[0]))] for _ in range(len(grid))]
+        # Grid for the explored positions
+        self.explored_grid = [[' ' for _ in range(self.num_rows)] for _ in range(self.num_cols)]
 
-        # Keeps track of the last action taken
+        # Action that led to the current state
         self.last_action = None
 
+    def print(self):
+        """
+        Prints the grid layout.
 
-    # Board Exploration Functions
+        """
+        for row in self.grid:
+            print('\t'.join(row))
 
     def get_value(self, row: int, col: int) -> str:
         """
@@ -82,22 +85,9 @@ class Board:
         """
         return self.grid[row][col]
 
-    def print(self):
-        """
-        Prints the grid layout.
-
-        Args:
-            valid_positions (list): A list of tuples representing valid positions.
-        """
-        for row in self.grid:
-            print('\t'.join(row))
-
-
-    # Goal Test Handling Functions
-
     def get_reachable_explored(self, row: int, col: int) -> list:
         """
-        Gets the reachable positions from the given position.
+        Gets the reachable explored positions from the given position.
 
         Args:
             row (int): The row index of the position.
@@ -129,9 +119,8 @@ class Board:
         reachable = [(r, c) for r, c in reachable if 0 <= r < self.num_rows and 0 <= c < self.num_cols]
 
         return reachable
-
-
-    # Board Edge and Corner Detection Functions
+    
+    # Auxiliar Functions to Check Position of the a Piece
 
     def is_corner_upper_right(self, row: int, col: int) -> bool:
         """
@@ -236,7 +225,6 @@ class Board:
             bool: True if the position is on the right edge, False otherwise.
         """
         return col == self.num_cols - 1          
-
 
     # Valid Actions Determination Functions Based on Position
 
@@ -415,7 +403,6 @@ class Board:
         # See if it is a straight pipe
         if piece in ('LH', 'LV'):
             return ['LV']
-
 
     # Valid Actions Determination Functions Based on Neighbors
 
@@ -646,6 +633,8 @@ class Board:
 
         return []
     
+    # Rotation Functions
+    
     def get_all_rotations(self, piece: str):
         """
         Returns all possible rotations for a piece.
@@ -677,9 +666,9 @@ class Board:
         # Return possible rotations for the given piece
         return rotations.get(piece, [])
 
-    def f_piece_restrictions(self, row: int, col: int) -> list:
+    def piece_restrictions(self, row: int, col: int) -> list:
         """
-        Returns valid rotations based on the F pieces in the neighbors of the given position.
+        Returns valid rotations based on the types of pieces in the neighbors of the given position.
 
         Args:
             row (int): The row index of the position.
@@ -690,7 +679,7 @@ class Board:
         """
 
         piece = self.board.get_value(row, col)
-        f_neighbors_count = 0
+        neighbors_count = 0
 
         # Neighbors that are F pieces
         upper = False
@@ -703,31 +692,31 @@ class Board:
             # If upper neighbor is starts with F
             if self.board.get_value(row-1, col).startswith('F'):
                 upper = True
-                f_neighbors_count += 1
+                neighbors_count += 1
         
         if row < self.board.num_rows - 1:
             # If lower neighbor is starts with F
             if self.board.get_value(row+1, col).startswith('F'):
                 lower = True
-                f_neighbors_count += 1
+                neighbors_count += 1
 
         if col > 0:
             # If left neighbor is starts with F
             if self.board.get_value(row, col-1).startswith('F'):
                 left = True
-                f_neighbors_count += 1
+                neighbors_count += 1
 
         if col < self.board.num_cols - 1:
             # If right neighbor is starts with F
             if self.board.get_value(row, col+1).startswith('F'):
                 right = True
-                f_neighbors_count += 1
+                neighbors_count += 1
         
         # If piece starts with F
         if piece.startswith('F'):
 
             # If there is only one F neighbor
-            if f_neighbors_count == 1:
+            if neighbors_count == 1:
                 if upper == True:
                     return ['FB', 'FE', 'FD']
                 if left == True:
@@ -738,7 +727,7 @@ class Board:
                     return ['FC', 'FB', 'FE']
             
             # If there are two F neighbors
-            if f_neighbors_count == 2:
+            if neighbors_count == 2:
                 if upper == True and lower == True:
                     return ['FE', 'FD']
                 if left == True and right == True:
@@ -753,7 +742,7 @@ class Board:
                     return ['FD', 'FC']
             
             # If there are three F neighbors
-            if f_neighbors_count == 3:
+            if neighbors_count == 3:
                 if upper == False:
                     return ['FC']
                 if lower == False:
@@ -767,7 +756,7 @@ class Board:
         if piece.startswith('V'):
 
             # If there is only two F neighbor
-            if f_neighbors_count == 2:
+            if neighbors_count == 2:
                 if upper == True and right == True:
                     return ['VC', 'VE', 'VB']
                 if upper == True and left == True:
@@ -778,7 +767,7 @@ class Board:
                     return ['VC', 'VD', 'VB']
             
             # If there are three F neighbors
-            if f_neighbors_count == 3:
+            if neighbors_count == 3:
                 if upper == False:
                     return ['VC', 'VD']
                 if lower == False:
@@ -792,14 +781,14 @@ class Board:
         if piece.startswith('L'):
 
             # If there is only two F neighbor
-            if f_neighbors_count == 2:
+            if neighbors_count == 2:
                 if upper == True and lower == True:
                     return ['LH']
                 if left == True and right == True:
                     return ['LV']
                 
             # If there are three F neighbors
-            if f_neighbors_count == 3:
+            if neighbors_count == 3:
                 if upper == False:
                     return ['LV']
                 if lower == False:
@@ -809,22 +798,7 @@ class Board:
                 if right == False:
                     return ['LH']
         
-        # If the piece starts with B
-        if piece.startswith('B'):
-
-            # If there are three F neighbor
-            if f_neighbors_count == 3:
-                if upper == False:
-                    return ['BE', 'BD', 'BC']
-                if lower == False:
-                    return ['BE','BD','BB']
-                if left == False:
-                    return ['BB', 'BC', 'BD']
-                if right == False:
-                    return ['BD', 'BC', 'BE']
         return self.board.get_all_rotations(piece)
-        
-    # Board Rotation Functions
 
     def get_valid_rotations_pos(self, piece: str, row: int, col: int) -> list:     
         """
@@ -943,12 +917,12 @@ class Board:
 
         
         
-        # check which have valid rotations
+        # Check which have valid rotations
         for i in range(4):
             if exists[i]:
                 existing_neighbors.append(rotations[i])
 
-        # do the intersection of the lists
+        # Do the intersection of the lists
         intersect_rotations = []
         if len(existing_neighbors) > 0:
             intersect_rotations = existing_neighbors[0]
@@ -960,7 +934,7 @@ class Board:
             intersect_rotations = board.get_all_rotations(piece)
 
         # Check if piece (except B pieces) have F pieces in the neighbors
-        f_neighbor_restrictions = self.f_piece_restrictions(row, col)
+        f_neighbor_restrictions = self.piece_restrictions(row, col)
         
         # Intersect the valid rotations with the F piece restrictions
         if f_neighbor_restrictions != None:
@@ -991,7 +965,7 @@ class Board:
         # Get the valid rotations based on the neighbors of the piece that are already in the correct position
         valid_rotations_neighbors = self.get_valid_rotations_neighbors(piece, row, col) 
 
-        # do the intersection of the two lists
+        # Do the intersection of the two lists
         valid_rotations = []
 
         # See if there are limitations on the piece's position (outer border or not)
@@ -1018,19 +992,18 @@ class Board:
             Board: An instance of the Board class representing the parsed grid.
         """
         grid = []
-        input_str = sys.stdin.read().strip()  # Read the entire input instead of just one line
+        input_str = sys.stdin.read().strip()  # Read the entire input
     
         lines = input_str.split('\n')  # Split by newline characters
         for line in lines:
-            pieces = line.split()  # Split by whitespace (spaces)
+            pieces = line.split()  # Split by whitespaces
             grid.append(pieces)
 
+        # Create a Board instance with the parsed grid
         return Board(grid)
-    
-
-from collections import deque
 
 class PipeManiaState:
+    # Static variable to keep track of the state id
     state_id = 0
 
     def __init__(self, board: Board):
@@ -1039,31 +1012,31 @@ class PipeManiaState:
 
         Args:
             board (Board): The board
-
-        Returns:
-            PipeManiaState: A new instance of the PipeManiaState class.
         """
+
+        # Set the board 
         self.board = board
+        
+        # Set the state id
         self.id = PipeManiaState.state_id
+
+        # Increment the state id
         PipeManiaState.state_id += 1
 
 
     def __lt__(self, other):
-        """
-        Compares two states based on their action count. Used in case of a tie in informed search algorithms.
-
+        """This method is used in case of a tie in managing the open list in informed searches.
+        
         Args:
             other (PipeManiaState): The other state to compare with.
-
-        Returns:
-            bool: True if the current state has more actions than the other state, False otherwise.
         """
         return self.board.action_count > other.board.action_count
 
 class PipeMania(Problem):
 
     def __init__(self, initial_state: Board):
-        """ O construtor especifica o estado inicial. """
+        """The constructor specifies the initial state."""
+
         self.initial = initial_state
 
     def actions(self, state: PipeManiaState):
@@ -1080,51 +1053,75 @@ class PipeMania(Problem):
         unique_actions = [] 
         available_actions = []
 
+        # Check if the board is invalid
         if state.board.invalid:
             return []
 
+        # Check if there are still only unique actions to be explored
         if state.board.unique_to_be_explored:
             for row in range(num_rows):
                 for col in range(num_cols):
                     piece = state.board.get_value(row, col)
                     valid_rotations = state.board.get_valid_rotations(piece, row, col)
+
+                    # If there is only one valid rotation for a piece
                     if len(valid_rotations) == 1:
+                        # Mark the position as explored
                         state.board.explored_grid[row][col] = valid_rotations[0][0]
+
+                        # Accumulate the unique action
                         available_actions.append(valid_rotations[0])
+        
             if available_actions:
                 return [available_actions]
 
+        # Mark the board as not unique to be explored if there are no unique actions
         state.board.unique_to_be_explored = False
 
+        """
+        For a center exploration method, replace iterating logic with:
         center_row, center_col = num_rows // 2, num_cols // 2
         cells = [(row, col) for row in range(num_rows) for col in range(num_cols)]
         cells.sort(key=lambda cell: abs(cell[0] - center_row) + abs(cell[1] - center_col))
 
         for row, col in cells:
-            if state.board.explored_grid[row][col] == ' ':
-                piece = state.board.get_value(row, col)
-                valid_rotations = state.board.get_valid_rotations(piece, row, col)
-                if len(valid_rotations) > 1:
-                    for rotation in valid_rotations:
-                        action = unique_actions.copy()
-                        action.append(rotation)
-                        available_actions.append(action)
-                    return available_actions
+            (...)
+        """
 
-                if not valid_rotations:
-                    if not available_actions:
-                        if not unique_actions:
-                            state.board.invalid = True
-                            return []
-                        return unique_actions
+        # Iterate the board in a diagonal manner
+        for s in range(num_rows + num_cols - 1):
+            for row in range(max(0, s - num_cols + 1), min(s + 1, num_rows)):
+                col = s - row
+                # If the position is not explored
+                if state.board.explored_grid[row][col] == ' ':
+                    piece = state.board.get_value(row, col)
+                    valid_rotations = state.board.get_valid_rotations(piece, row, col)
+                    # If there is more than one valid rotation for a piece
+                    if len(valid_rotations) > 1:
+                        for rotation in valid_rotations:
+                            action = unique_actions.copy()
+                            action.append(rotation)
+                            available_actions.append(action)
+                        # Return unique actions along with one of the valid rotations
+                        return available_actions
 
-                else:
-                    state.board.explored_grid[row][col] = valid_rotations[0][0]
-                    unique_actions.append(valid_rotations[0])
+                    # If there is no valid rotation for a piece, mark the board as invalid
+                    if not valid_rotations:
+                        if not available_actions:
+                            if not unique_actions:
+                                state.board.invalid = True
+                                return []
+                            return unique_actions
 
+                    else:
+                        state.board.explored_grid[row][col] = valid_rotations[0][0]
+                        unique_actions.append(valid_rotations[0])
+
+        # Return the unique actions
         return [unique_actions]
-                       
+                         
     def goal_test(self, state: PipeManiaState)-> bool:
+
         """
         Checks if the given state is a goal state.
 
@@ -1135,9 +1132,11 @@ class PipeMania(Problem):
             bool: True if the state is a goal state, False otherwise.
         """
 
+        # Check if the board is fully explored
         if state.board.explored_count != state.board.board_size:
             return False
         
+        # If last action is None
         if len(state.board.last_action) == 0:
             return self.bfs(state, (0,0))
         
@@ -1149,7 +1148,7 @@ class PipeMania(Problem):
    
     def bfs(self, state, source):
         """
-        Perform a BFS traversal from the source position to check if all explored positions are connected.
+        Perform a BFS traversal from a given position to check if all positions are connected.
         This BFS ensures that each node is visited exactly once and doesn't form cycles.
 
         Args:
@@ -1159,8 +1158,8 @@ class PipeMania(Problem):
         Returns:
             bool: True if all explored positions are connected and no cycles are detected, False otherwise.
         """
-        num_rows = len(state.board.grid)
-        num_cols = len(state.board.grid[0])
+        num_rows = state.board.num_rows
+        num_cols = state.board.num_cols
         visited = [[False for _ in range(num_cols)] for _ in range(num_rows)]
         queue = deque([(source, None)])  # Store (current_node, previous_node)
 
@@ -1185,12 +1184,13 @@ class PipeMania(Problem):
             for c in range(num_cols):
                 if state.board.explored_grid[r][c] != ' ' and not visited[r][c]:
                     state.board.invalid = True
-                    return False
+                    return False # Not all positions are connected
 
         state.board.invalid = True
         return True
                                         
     def result(self, state: PipeManiaState, action):
+
         """
         Returns the resulting state after executing the given action on the given state.
 
@@ -1209,13 +1209,14 @@ class PipeMania(Problem):
         new_grid = [row[:] for row in state.board.grid]
         new_board = Board(new_grid)
 
-
+        # Copy the board attributes
         new_board.unique_to_be_explored = state.board.unique_to_be_explored
 
         new_board.action_count = len(action)
 
         new_board.explored_count = state.board.explored_count
 
+        # Copy the action that led to the new state
         new_board.last_action = action
 
         # Copy explored positions
@@ -1239,52 +1240,33 @@ class PipeMania(Problem):
         return PipeManiaState(new_board)
 
     def h(self, node: Node):
-        """
-        Heuristic function used for A* search.
-        
-        Args:
-            node (Node): The current node in the search.
-            
-        Returns:
-            int: The heuristic value of the node.
-        """
-        # Check if the board is invalid
-        if node.state.board.invalid:
-            # If so, return a high heuristic value
-            return node.state.board.board_size + 1
+        """Heuristic function"""
 
-        # Return the number of unexplored positions
+        # Check if the node is invalid
+        if node.state.board.invalid:
+            # Return a high value to avoid expanding invalid nodes
+            return node.state.board.board_size + 1
         return node.state.board.board_size - node.state.board.explored_count
 
-if __name__ == "__main__":   
-    start_time = time.time()
+if __name__ == "__main__": 
+    """start_time = time.time()
 
     # Track initial memory usage
-    initial_memory = psutil.Process().memory_info().rss
-
-    # Parse the board from the input
+    initial_memory = psutil.Process().memory_info().rss  """
     board = Board.parse_instance()
-
-    # Create a PipeMania problem instance
     problem = PipeMania(board)
-
-    # Perform a greedy search to solve the PipeMania puzzle
-    goal_node = recursive_best_first_search(problem)
-
-    # Print the solution
+    goal_node = greedy_search(problem)
     goal_node.state.board.print()
-
+    """
     # Calculate execution time
     end_time = time.time()
     execution_time = end_time - start_time
     print("Execution time:", execution_time, "seconds")
 
-    
-    
     # Calculate memory usage
     final_memory = psutil.Process().memory_info().rss
     memory_usage = final_memory - initial_memory
     memory_usage_MB = memory_usage / (1024 * 1024)
     print("Memory usage:", memory_usage_MB, "MB")
-    print("Size:", len(board.grid[0] * len(board.grid)))
+    print("Size:", len(board.grid[0] * len(board.grid)))"""
     pass
