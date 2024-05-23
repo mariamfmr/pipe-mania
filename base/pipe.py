@@ -15,13 +15,6 @@ from search import (
 import sys
 from collections import deque
 
-"""import time
-import colorama
-import psutil
-from colorama import Fore, Back, Style
-colorama.init(autoreset=True)"""
-
-
 class Board:
 
     def __init__(self, grid):
@@ -1249,24 +1242,8 @@ class PipeMania(Problem):
         return node.state.board.board_size - node.state.board.explored_count
 
 if __name__ == "__main__": 
-    """start_time = time.time()
-
-    # Track initial memory usage
-    initial_memory = psutil.Process().memory_info().rss  """
     board = Board.parse_instance()
     problem = PipeMania(board)
     goal_node = greedy_search(problem)
     goal_node.state.board.print()
-    """
-    # Calculate execution time
-    end_time = time.time()
-    execution_time = end_time - start_time
-    print("Execution time:", execution_time, "seconds")
-
-    # Calculate memory usage
-    final_memory = psutil.Process().memory_info().rss
-    memory_usage = final_memory - initial_memory
-    memory_usage_MB = memory_usage / (1024 * 1024)
-    print("Memory usage:", memory_usage_MB, "MB")
-    print("Size:", len(board.grid[0] * len(board.grid)))"""
     pass
