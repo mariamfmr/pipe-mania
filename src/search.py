@@ -608,6 +608,8 @@ def recursive_best_first_search(problem, h=None):
     h = memoize(h or problem.h, 'h')
 
     def RBFS(problem, node, flimit):
+        #node.state.board.print()
+        #print("\n")
         if problem.goal_test(node.state):
             return node, 0  # (The second value is immaterial)
         successors = node.expand(problem)

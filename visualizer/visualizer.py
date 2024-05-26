@@ -8,7 +8,7 @@ def visualizer():
         grid = [line.strip().split("\t") for line in f] 
 
         # Assuming the images are in images directory and named 'FC.png', 'VC.png', etc.
-        path_to_images = 'Visualizador/images/'
+        path_to_images = 'visualizer/images/'
 
      
         fig, axs = plt.subplots(len(grid), len(grid[0]), figsize=(5, 5)) 
