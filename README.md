@@ -4,6 +4,16 @@
 
 This project involves solving a grid-based puzzle similar to Pipe Mania. The goal is to ensure water flows through all the pipes on the board without creating any cycles. This project implements various algorithms to explore the board and check connectivity.
 
+<p align="center">
+  <img src="report/test15/Figure_0.png" alt="Puzzle Before" width="300" />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="report/test15/Figure_15.png" alt="Puzzle After" width="300" />
+</p>
+<p align="center">
+  Fig1. Before solving the puzzle. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Fig2. After solving the puzzle.
+</p>
+
+
 ### Getting Started
 
 Clone the repository to your local machine using the following command in your terminal or command prompt:
@@ -14,7 +24,7 @@ git clone https://github.com/mariamfmr/pipemania-ai/
 
 ### Dependencies
 
-The project uses Python 3 and requires the following dependencies:
+The project uses **Python3** and requires the following dependencies:
 
     numpy: For numerical operations and handling grids efficiently.
     matplotlib: For plotting and visualizations.
@@ -26,7 +36,7 @@ To install all the dependencies, run:
 
     pip install -r src/requirements.txt
 
-Ensure you have Python3 installed on your system before setting up and installing dependencies.
+Ensure you have **Python3** installed on your system before setting up and installing dependencies.
 
 ### Project Structure
 
@@ -54,4 +64,4 @@ To run the program on a specific input with colorama:
 
 ### Conclusion
 
-We solved the PipeMania with multiple algorithms as shown in the report, however the one that performed best was the greedy search with an efficient heuristic. More can be found in report/analysis.
+We solved the PipeMania with multiple algorithms as shown in the report, however the one that performed best was the greedy search with an efficient heuristic. More can be found in **report/analysis**.
